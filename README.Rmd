@@ -1,0 +1,206 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# indicatorrecode
+
+<!-- badges: start -->
+<!-- badges: end -->
+
+The goal of indicatorrecode is to ...
+
+
+# Context:  *indicator variables well understood*
+
+- https://emilyriederer.netlify.app/post/column-name-contracts/
+
+# Problem:  *content loss using indicator variables directly in data products*
+
+```{r cars}
+library(tidyverse)
+
+tidytitanic::passengers %>% 
+  ggplot() + 
+  aes(x = survived) + 
+  geom_bar()
+
+tidytitanic::passengers %>% 
+  count(survived)
+
+tidytitanic::passengers %>% 
+  janitor::tabyl(sex, survived)
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ survived)
+```
+
+
+# One-off solution:  *manual indicator recode, but is repetitive*
+
+addition downside is unanticipated reordering depending on value of true case v. false case category 
+
+```{r}
+tidytitanic::passengers %>% 
+  tibble() %>% 
+  mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
+         .before = 1)
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ ifelse(survived, "survived", "not survived"))
+```
+
+
+
+# Proposed many-times solution:  *ind_recode() function uses variable name as starting point for creating true and false human understandable categories*
+  
+```{r}
+ind_recode <- function(var, var_prefix = "ind_", negator = "not", cat_true = NULL, cat_false = NULL, rev = FALSE){
+  
+  if(is.null(cat_true)){
+    cat_true = deparse(substitute(var)) %>% 
+      str_remove(paste0("^", var_prefix)) %>% 
+      str_replace_all("_", " ")
+  }
+  
+  if(is.null(cat_false)){
+    cat_false = paste(negator, cat_true)
+  }
+  
+  # for yes/no case
+  if(is.character({{var}})){
+    
+    my_var <- {{var}} %>% as.factor() %>% as.numeric() - 1
+    
+  }else{
+      
+    my_var <- {{var}}
+    }
+    
+      if(rev){
+    ifelse(my_var, cat_true, cat_false) %>% 
+      factor(levels = c(cat_true, cat_false))
+  }else{
+    ifelse(my_var, cat_true, cat_false) %>% 
+      factor(levels = c(cat_false, cat_true))
+  }
+    
+
+}
+
+tibble(ind_female = c(0,0,1,1,1 ,0 ,0)) %>% 
+  mutate(cat_female  = ind_recode(ind_female))
+
+tibble(ind_female = c(T,T,F)) %>% 
+  mutate(cat_female  = ind_recode(ind_female))
+
+tibble(ind_female = c("Y", "N")) %>% 
+  mutate(cat_female  = ind_recode(ind_female))
+
+tibble(ind_female = c("y", "n")) %>% 
+  mutate(cat_female  = ind_recode(ind_female))
+
+tibble(ind_female = c("yes", "no")) %>% 
+  mutate(cat_female  = ind_recode(ind_female))
+
+
+```
+
+# Examples:  *How to use ind_recode()*
+
+```{r}
+tidytitanic::passengers %>% 
+  tibble() %>% 
+  mutate(cat_survived = ind_recode(survived))
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = ind_recode(survived)) + 
+  geom_bar()
+
+# or
+last_plot() +
+  aes(x = ind_recode(survived, cat_false = "perished"))
+
+  
+# or
+last_plot() +
+  aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
+  labs(x = NULL)
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ ind_recode(survived))
+```
+
+# Known Limitations:  *not for use with magrittr pipe (but base pipe works!)*
+
+```{r}
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ survived %>% ind_recode())
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ survived |> ind_recode())
+```
+
+# Other questions: *1) Is there already a solution and 2) fundamental problems with this approach?*
+
+Please lemme know 'em! 
+
+
+# example with tidytuesday data, Spam email
+
+https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-08-15
+
+```{r}
+read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv") %>% 
+  rename(spam = yesno) %>% 
+  ggplot() + 
+  aes(fill = ind_recode(bang>0), x = ind_recode(spam)) + 
+  geom_bar(position = "dodge")
+
+remove_layers <- function(plot, index = NULL){
+  
+  if(is.null(index)){
+  plot$layers <- NULL
+  }else{
+  plot$layers[[index]] <- NULL
+  }
+  
+ plot
+  
+}
+
+read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv") %>% 
+  rename(spam = yesno) %>% 
+  ggplot() + 
+  aes(fill = ind_recode(bang>0), x = ind_recode(spam)) + 
+  geom_bar(position = "dodge") -> 
+  p; p |> remove_layers() +
+  geom_bar(position = "fill")
+
+```
