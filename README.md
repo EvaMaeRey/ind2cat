@@ -1,19 +1,19 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# indicatorrecode
+# Abstract
 
 <!-- badges: start -->
 
 <!-- badges: end -->
 
-The goal of indicatorrecode is to …
+{{ind2cat}} can help analysts translate from an indicator variables to
+categorical variables that can be used in reporting products. By
+default, the categorical variable is created from the indicator variable
+name, resulting in a light weight syntax.
 
-# Context: *indicator variables well understood*
-
-  - <https://emilyriederer.netlify.app/post/column-name-contracts/>
-
-# Problem: *content loss using indicator variables directly in data products*
+ind2cat’s ind\_recode function saves time by automatically creating
+meaningful categories based on a variable name as shown below:
 
 ``` r
 library(tidyverse)
@@ -27,6 +27,53 @@ library(tidyverse)
 #> ✖ dplyr::filter() masks stats::filter()
 #> ✖ dplyr::lag()    masks stats::lag()
 #> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+library(indicatorrecode)
+
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ind_recode(ind_graduated))
+#>   ind_graduated cat_graduated
+#> 1          TRUE     graduated
+#> 2          TRUE     graduated
+#> 3         FALSE not graduated
+```
+
+This can replace the less succinct approach:
+
+``` r
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ifelse(ind_graduated, 
+                                 "graduated", 
+                                 "not graduated")) |>
+  mutate(cat_graduated = fct_rev(cat_graduated))  
+#>   ind_graduated cat_graduated
+#> 1          TRUE     graduated
+#> 2          TRUE     graduated
+#> 3         FALSE not graduated
+```
+
+# Background: *indicator variables a common and well understood way to store information.*
+
+Indicator variables are often used in data analyses given the ease which
+with they are created, stored and interpreted. They concisely encode
+information about the presence or not of a condition for observational
+units.
+
+see.. <https://emilyriederer.netlify.app/post/column-name-contracts/>
+
+In exploratory analyses indicator variables, analysts often make a
+choice between crafting an categorical variable whose values preserve
+the information that the indicator variable *name* holds, or using an
+indicator variable as-is; the later choice may be motivated by time
+savings.
+
+# Problem: Direct use of indicator variables in data products.
+
+When indicator variables are not translated to a categorical analogue in
+creating data products like tables and visuals, information is often
+awkwardly displayed and is sometimes lost.
+
+``` r
+library(tidyverse)
 
 tidytitanic::passengers %>% 
   ggplot() + 
@@ -34,21 +81,49 @@ tidytitanic::passengers %>%
   geom_bar()
 ```
 
-<img src="man/figures/README-cars-1.png" width="100%" />
+<div class="figure">
+
+<img src="man/figures/README-cars-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
+
+<p class="caption">
+
+A. Bar labels + axis label preserves information but is awkward
+
+</p>
+
+</div>
 
 ``` r
 
 tidytitanic::passengers %>% 
-  count(survived)
-#>   survived   n
-#> 1        0 863
-#> 2        1 450
+  count(survived) %>% 
+  knitr::kable(caption = "B. Column header from variable name and 0-1 categories preserves information but is awkward")
+```
+
+| survived |   n |
+| -------: | --: |
+|        0 | 863 |
+|        1 | 450 |
+
+B. Column header from variable name and 0-1 categories preserves
+information but is awkward
+
+``` r
+
 
 tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived)
-#>     sex   0   1
-#>  female 154 308
-#>    male 709 142
+  janitor::tabyl(sex, survived) %>% 
+  knitr::kable(caption = "C. Information loss with a two-way table for column variables")
+```
+
+| sex    |   0 |   1 |
+| :----- | --: | --: |
+| female | 154 | 308 |
+| male   | 709 | 142 |
+
+C. Information loss with a two-way table for column variables
+
+``` r
 
 tidytitanic::passengers %>% 
 ggplot() + 
@@ -57,12 +132,20 @@ ggplot() +
   facet_grid(~ survived)
 ```
 
-<img src="man/figures/README-cars-2.png" width="100%" />
+<div class="figure">
+
+<img src="man/figures/README-cars-2.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
+
+<p class="caption">
+
+D. Facetting directly on an indicator variable with popular ggplot2
+results in information loss
+
+</p>
+
+</div>
 
 # One-off solution: *manual indicator recode, but is repetitive*
-
-addition downside is unanticipated reordering depending on value of true
-case v. false case category
 
 ``` r
 tidytitanic::passengers %>% 
@@ -91,120 +174,243 @@ ggplot() +
   facet_grid(~ ifelse(survived, "survived", "not survived"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
-# Proposed many-times solution: *ind\_recode() function uses variable name as starting point for creating true and false human understandable categories*
+This solution above also does not address category display ordering;
+ordering in products will be alphabetical and not reflect the F/T order
+of the source variable. An additional step to reflect the source
+variable, using a function like fct\_rev, may be required for
+consistency in reporting.
 
 ``` r
-ind_recode <- function(var, var_prefix = "ind_", negator = "not", cat_true = NULL, cat_false = NULL, rev = FALSE){
-  
+data.frame(ind_daytime = c(T, F, T, T)) %>% 
+    mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
+  mutate(cat_survived = fct_rev(cat_survived)) %>% 
+  ggplot() + 
+  aes(x = cat_survived) + 
+  geom_bar()
+```
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+# Introducing ind\_recode *ind\_recode() function uses variable name as starting point for human-readable categories*
+
+<!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. -->
+
+``` r
+#' ind_recode
+#'
+#' @param var the name of an indicator variable
+#' @param var_prefix a character string that will be ignored when creating the categorical variable
+#' @param negator a character string used to create cat_false when cat_false is NULL, default is 'not'
+#' @param cat_true a character string string to be used place of  T/1/"Yes" for the categorical variable output, if NULL the category is automatically generated from the variable name
+#' @param cat_false a character string string to be used place of  F/0/"No" for the categorical variable output, if NULL the category is automatically generated from the cat true and the negator
+#' @param rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' library(tibble)
+#' library(dplyr)
+#' tibble(ind_grad = c(0,0,1,1,1 ,0 ,0)) %>%
+#'   mutate(cat_grad  = ind_recode(ind_grad))
+#'
+#' tibble(ind_grad = c(TRUE,TRUE,FALSE)) %>%
+#'   mutate(cat_grad  = ind_recode(ind_grad))
+#'
+#' tibble(ind_grad = c("Y", "N")) %>%
+#'   mutate(cat_grad  = ind_recode(ind_grad))
+#'
+#' tibble(ind_grad = c("y", "n")) %>%
+#'   mutate(cat_grad  = ind_recode(ind_grad))
+#'
+#' tibble(ind_grad = c("yes", "no")) %>%
+#'   mutate(cat_grad  = ind_recode(ind_grad))
+ind_recode <- function(var, var_prefix = "ind_", negator = "not",
+                       cat_true = NULL, cat_false = NULL, rev = FALSE){
+
   if(is.null(cat_true)){
-    cat_true = deparse(substitute(var)) %>% 
-      str_remove(paste0("^", var_prefix)) %>% 
-      str_replace_all("_", " ")
+    cat_true = deparse(substitute(var)) %>%   # use r lang in rewrite
+      stringr::str_remove(paste0("^", var_prefix)) %>%
+      stringr::str_replace_all("_", " ")
   }
-  
+
   if(is.null(cat_false)){
     cat_false = paste(negator, cat_true)
   }
-  
+
   # for yes/no case
   if(is.character({{var}})){
-    
+
     my_var <- {{var}} %>% as.factor() %>% as.numeric() - 1
-    
+
   }else{
-      
+
     my_var <- {{var}}
-    }
-    
-      if(rev){
-    ifelse(my_var, cat_true, cat_false) %>% 
+  }
+
+  if(rev){
+    ifelse(my_var, cat_true, cat_false) %>%
       factor(levels = c(cat_true, cat_false))
   }else{
-    ifelse(my_var, cat_true, cat_false) %>% 
+    ifelse(my_var, cat_true, cat_false) %>%
       factor(levels = c(cat_false, cat_true))
   }
-    
+
 
 }
-
-tibble(ind_female = c(0,0,1,1,1 ,0 ,0)) %>% 
-  mutate(cat_female  = ind_recode(ind_female))
-#> # A tibble: 7 × 2
-#>   ind_female cat_female
-#>        <dbl> <fct>     
-#> 1          0 not female
-#> 2          0 not female
-#> 3          1 female    
-#> 4          1 female    
-#> 5          1 female    
-#> 6          0 not female
-#> 7          0 not female
-
-tibble(ind_female = c(T,T,F)) %>% 
-  mutate(cat_female  = ind_recode(ind_female))
-#> # A tibble: 3 × 2
-#>   ind_female cat_female
-#>   <lgl>      <fct>     
-#> 1 TRUE       female    
-#> 2 TRUE       female    
-#> 3 FALSE      not female
-
-tibble(ind_female = c("Y", "N")) %>% 
-  mutate(cat_female  = ind_recode(ind_female))
-#> # A tibble: 2 × 2
-#>   ind_female cat_female
-#>   <chr>      <fct>     
-#> 1 Y          female    
-#> 2 N          not female
-
-tibble(ind_female = c("y", "n")) %>% 
-  mutate(cat_female  = ind_recode(ind_female))
-#> # A tibble: 2 × 2
-#>   ind_female cat_female
-#>   <chr>      <fct>     
-#> 1 y          female    
-#> 2 n          not female
-
-tibble(ind_female = c("yes", "no")) %>% 
-  mutate(cat_female  = ind_recode(ind_female))
-#> # A tibble: 2 × 2
-#>   ind_female cat_female
-#>   <chr>      <fct>     
-#> 1 yes        female    
-#> 2 no         not female
 ```
 
-# Examples: *How to use ind\_recode()*
+# to do
+
+  - change to Rlang for grabbing function name
+  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
+
+# Basic examples: *How to use ind\_recode()*
 
 ``` r
-tidytitanic::passengers %>% 
-  tibble() %>% 
-  mutate(cat_survived = ind_recode(survived))
-#> # A tibble: 1,313 × 6
-#>    name                                        class   age sex   survi…¹ cat_s…²
-#>    <chr>                                       <chr> <dbl> <chr>   <int> <fct>  
-#>  1 Allen, Miss Elisabeth Walton                1st   29    fema…       1 surviv…
-#>  2 Allison, Miss Helen Loraine                 1st    2    fema…       0 not su…
-#>  3 Allison, Mr Hudson Joshua Creighton         1st   30    male        0 not su…
-#>  4 Allison, Mrs Hudson JC (Bessie Waldo Danie… 1st   25    fema…       0 not su…
-#>  5 Allison, Master Hudson Trevor               1st    0.92 male        1 surviv…
-#>  6 Anderson, Mr Harry                          1st   47    male        1 surviv…
-#>  7 Andrews, Miss Kornelia Theodosia            1st   63    fema…       1 surviv…
-#>  8 Andrews, Mr Thomas, jr                      1st   39    male        0 not su…
-#>  9 Appleton, Mrs Edward Dale (Charlotte Lamso… 1st   58    fema…       1 surviv…
-#> 10 Artagaveytia, Mr Ramon                      1st   71    male        0 not su…
-#> # … with 1,303 more rows, and abbreviated variable names ¹​survived,
-#> #   ²​cat_survived
+library(tibble)
+tibble(ind_grad = c(0,0,1,1,1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(ind_grad))
+#> # A tibble: 7 × 2
+#>   ind_grad cat_grad
+#>      <dbl> <fct>   
+#> 1        0 not grad
+#> 2        0 not grad
+#> 3        1 grad    
+#> 4        1 grad    
+#> 5        1 grad    
+#> 6        0 not grad
+#> 7        0 not grad
 
+tibble(ind_grad = c(T,T,F)) %>%
+  mutate(cat_grad  = ind_recode(ind_grad))
+#> # A tibble: 3 × 2
+#>   ind_grad cat_grad
+#>   <lgl>    <fct>   
+#> 1 TRUE     grad    
+#> 2 TRUE     grad    
+#> 3 FALSE    not grad
+
+tibble(ind_grad = c("Y", "N")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad
+#>   <chr>    <fct>   
+#> 1 Y        grad    
+#> 2 N        not grad
+
+tibble(ind_grad = c("y", "n")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad
+#>   <chr>    <fct>   
+#> 1 y        grad    
+#> 2 n        not grad
+
+tibble(ind_grad = c("yes", "no")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad
+#>   <chr>    <fct>   
+#> 1 yes      grad    
+#> 2 no       not grad
+```
+
+# Customizability
+
+We believe that ind\_recode is useful in quickly translating to a human
+understandable outcome.
+
+However, addition functionality allows analysts to fully specify their
+preferences about the categories outputted.
+
+  - var\_prefix a character string that will be ignored when creating
+    the categorical variable
+  - negator a character string used to create cat\_false when cat\_false
+    is NULL, default is ‘not’
+  - cat\_true a character string string to be used place of T/1/“Yes”
+    for the categorical variable output, if NULL the category is
+    automatically generated from the variable name
+  - cat\_false a character string string to be used place of F/0/“No”
+    for the categorical variable output, if NULL the category is
+    automatically generated from cat\_true and the negator
+  - rev logical indicating if the order should be reversed from the F/T
+    ordering of the indicator source variable, default is FALSE
+
+## Customization examples
+
+``` r
+tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
+#> # A tibble: 7 × 2
+#>   dummy_grad cat_grad
+#>        <dbl> <fct>   
+#> 1          0 not grad
+#> 2          0 not grad
+#> 3          1 grad    
+#> 4          1 grad    
+#> 5          1 grad    
+#> 6          0 not grad
+#> 7          0 not grad
+
+tibble(ind_grad = c(T,T,F)) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
+#> # A tibble: 3 × 2
+#>   ind_grad cat_grad   
+#>   <lgl>    <fct>      
+#> 1 TRUE     grad       
+#> 2 TRUE     grad       
+#> 3 FALSE    didn't grad
+
+tibble(ind_grad = c("Y", "N")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad
+#>   <chr>    <fct>   
+#> 1 Y        grad    
+#> 2 N        enrolled
+
+tibble(ind_grad = c("y", "n")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, 
+                                cat_true = "graduated"))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad     
+#>   <chr>    <fct>        
+#> 1 y        graduated    
+#> 2 n        not graduated
+
+tibble(ind_grad = c("y", "n")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, 
+                                cat_true = "graduated", 
+                                cat_false = "enrolled"))
+#> # A tibble: 2 × 2
+#>   ind_grad cat_grad 
+#>   <chr>    <fct>    
+#> 1 y        graduated
+#> 2 n        enrolled
+
+tibble(ind_grad = c("yes", "no")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
+  mutate(cat_grad_num = as.numeric(cat_grad))
+#> # A tibble: 2 × 3
+#>   ind_grad cat_grad cat_grad_num
+#>   <chr>    <fct>           <dbl>
+#> 1 yes      grad                1
+#> 2 no       not grad            2
+```
+
+## Use in data products like figures and tables
+
+``` r
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = ind_recode(survived)) + 
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
 
 ``` r
 
@@ -213,7 +419,7 @@ last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
 
 ``` r
 
@@ -224,7 +430,7 @@ last_plot() +
   labs(x = NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
 
 ``` r
 
@@ -235,7 +441,7 @@ ggplot() +
   facet_grid(~ ind_recode(survived))
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-10-4.png" width="100%" />
 
 # Known Limitations: *not for use with magrittr pipe (but base pipe works\!)*
 
@@ -247,7 +453,7 @@ ggplot() +
   facet_grid(~ survived %>% ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 ``` r
 
@@ -258,13 +464,19 @@ ggplot() +
   facet_grid(~ survived |> ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
+
+-----
+
+Afterward
 
 # Other questions: *1) Is there already a solution and 2) fundamental problems with this approach?*
 
 Please lemme know ’em\!
 
-# example with tidytuesday data, Spam email
+-----
+
+# worked example with tidytuesday data, Spam email
 
 <https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-08-15>
 
@@ -276,7 +488,7 @@ read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
   geom_bar(position = "dodge")
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ``` r
 
@@ -310,7 +522,7 @@ last_plot_wiped() +
   geom_bar(position = "fill")
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" /> \#
+<img src="man/figures/README-unnamed-chunk-12-2.png" width="100%" /> \#
 learned along the way: `as_factor()` has different behavior than
 `as.factor()`
 
