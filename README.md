@@ -292,13 +292,33 @@ remove_layers <- function(plot, index = NULL){
   
 }
 
-read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv") %>% 
-  rename(spam = yesno) %>% 
-  ggplot() + 
-  aes(fill = ind_recode(bang>0), x = ind_recode(spam)) + 
-  geom_bar(position = "dodge") -> 
-  p; p |> remove_layers() +
+last_plot_wiped <- function(index = NULL){
+  
+  plot <- last_plot()
+  
+  if(is.null(index)){
+  plot$layers <- NULL
+  }else{
+  plot$layers[[index]] <- NULL
+  }
+  
+ plot
+  
+}
+
+last_plot_wiped() +
   geom_bar(position = "fill")
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-2.png" width="100%" /> \#
+learned along the way: `as_factor()` has different behavior than
+`as.factor()`
+
+``` r
+c("Y", "N") %>% as_factor()
+#> [1] Y N
+#> Levels: Y N
+c("Y", "N") %>% as.factor()
+#> [1] Y N
+#> Levels: N Y
+```
