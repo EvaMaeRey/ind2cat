@@ -63,7 +63,6 @@ output: rticles::rjournal_article
 <!-- template (`RJreferences.bib`) and you will have to name your bib file as the -->
 <!-- tex, R, and pdf files. -->
 
-## Introduction
 
 ```{r, include=F}
 knitr::opts_chunk$set(message = F, 
@@ -74,7 +73,7 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../README.Rmd")  %>%  .[21:length(.)] %>% 
+readLines("../../README.Rmd")  %>%  .[34:length(.)] %>% 
   writeLines("../../readme_extract.Rmd")
 ```
 
@@ -104,6 +103,5 @@ rmd_parse <- function(file = "../../README.Rmd"){
     
   
 }
-
 
 ```

@@ -1,4 +1,4 @@
-Package: indicatorrecode
+Package: ind2cat
 Title: Translate from an Indicator Variables to Categorical Variables
 Version: 0.0.0.9000
 Authors@R: 

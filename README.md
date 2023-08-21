@@ -48,7 +48,7 @@ ind\_recode(), we can accomplish the same task shown above more
 succinctly:
 
 ``` r
-library(indicatorrecode)
+library(ind2cat)
 
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ind_recode(ind_graduated))

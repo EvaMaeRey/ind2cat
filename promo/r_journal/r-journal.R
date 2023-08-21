@@ -10,7 +10,7 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../README.Rmd")  %>%  .[21:length(.)] %>% 
+readLines("../../README.Rmd")  %>%  .[34:length(.)] %>% 
   writeLines("../../readme_extract.Rmd")
 
 
@@ -27,7 +27,7 @@ data.frame(ind_graduated = c(T,T,F)) |>
 
 
 ## ---- eval = T, message=F, warning=F------------------------------------------
-library(indicatorrecode)
+library(ind2cat)
 
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ind_recode(ind_graduated))

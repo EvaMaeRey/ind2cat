@@ -19,25 +19,7 @@ indicator variable name, resulting in a light weight syntax.
 }
 
 \hypertarget{introduction}{%
-\subsection{Introduction}\label{introduction}}
-
-\hypertarget{abstract}{%
-\section{Abstract}\label{abstract}}
-
-Indicator variables are often used in data analyses given the ease which
-with they are created, stored and interpreted. They concisely encode
-information about the presence or not of a condition for observational
-units. In exploratory analyses indicator variables, analysts often make
-a choice between crafting an categorical variable whose values preserve
-the information that the indicator variable column name holds, or using
-an indicator variable as-is; the later choice may be motivated by time
-savings. \{\{ind2cat\}\} can help analysts translate from an indicator
-variables to categorical variables that can be used in reporting
-products. By default, the categorical variable is created from the
-indicator variable name, resulting in a light weight syntax.
-
-\hypertarget{introduction-1}{%
-\section{Introduction}\label{introduction-1}}
+\section{Introduction}\label{introduction}}
 
 Recoding indicator variable values to meaningful and appropriately
 ordered categories often involves redundancy.
@@ -69,7 +51,7 @@ succinctly:
 
 \begin{Schunk}
 \begin{Sinput}
-library(indicatorrecode)
+library(ind2cat)
 
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ind_recode(ind_graduated))
