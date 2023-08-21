@@ -1,45 +1,36 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Abstract
-
 <!-- badges: start -->
 
 <!-- badges: end -->
 
-{{ind2cat}} can help analysts translate from an indicator variables to
-categorical variables that can be used in reporting products. By
-default, the categorical variable is created from the indicator variable
-name, resulting in a light weight syntax.
+# Abstract
 
-ind2cat’s ind\_recode function saves time by automatically creating
-meaningful categories based on a variable name as shown below:
+Indicator variables are often used in data analyses given the ease which
+with they are created, stored and interpreted. They concisely encode
+information about the presence or not of a condition for observational
+units. In exploratory analyses indicator variables, analysts often make
+a choice between crafting an categorical variable whose values preserve
+the information that the indicator variable column name holds, or using
+an indicator variable as-is; the later choice may be motivated by time
+savings. {{ind2cat}} can help analysts translate from an indicator
+variables to categorical variables that can be used in reporting
+products. By default, the categorical variable is created from the
+indicator variable name, resulting in a light weight syntax.
+
+<!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
+
+# Introduction
+
+Recoding indicator variable values to meaningful and appropriately
+ordered categories often involves redundancy.
+
+*more description of example here*
 
 ``` r
 library(tidyverse)
-#> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-#> ✔ dplyr     1.1.0     ✔ readr     2.1.4
-#> ✔ forcats   1.0.0     ✔ stringr   1.5.0
-#> ✔ ggplot2   3.4.1     ✔ tibble    3.2.0
-#> ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
-#> ✔ purrr     1.0.1     
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
-#> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-library(indicatorrecode)
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
-#>   ind_graduated cat_graduated
-#> 1          TRUE     graduated
-#> 2          TRUE     graduated
-#> 3         FALSE not graduated
-```
-
-This can replace the less succinct approach:
-
-``` r
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ifelse(ind_graduated, 
                                  "graduated", 
@@ -51,101 +42,42 @@ data.frame(ind_graduated = c(T,T,F)) |>
 #> 3         FALSE not graduated
 ```
 
-# Background: *indicator variables a common and well understood way to store information.*
-
-Indicator variables are often used in data analyses given the ease which
-with they are created, stored and interpreted. They concisely encode
-information about the presence or not of a condition for observational
-units.
-
-see.. <https://emilyriederer.netlify.app/post/column-name-contracts/>
-
-In exploratory analyses indicator variables, analysts often make a
-choice between crafting an categorical variable whose values preserve
-the information that the indicator variable *name* holds, or using an
-indicator variable as-is; the later choice may be motivated by time
-savings.
-
-# Problem: Direct use of indicator variables in data products.
-
-When indicator variables are not translated to a categorical analogue in
-creating data products like tables and visuals, information is often
-awkwardly displayed and is sometimes lost.
+ind2cat’s ind\_recode function avoids repetition by creating categories
+based on the indicator variable name. Using the the function
+ind\_recode(), we can accomplish the same task shown above more
+succinctly:
 
 ``` r
-library(tidyverse)
+library(indicatorrecode)
 
-tidytitanic::passengers %>% 
-  ggplot() + 
-  aes(x = survived) + 
-  geom_bar()
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ind_recode(ind_graduated))
+#>   ind_graduated cat_graduated
+#> 1          TRUE     graduated
+#> 2          TRUE     graduated
+#> 3         FALSE not graduated
 ```
 
-<div class="figure">
-
-<img src="man/figures/README-cars-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
-
-<p class="caption">
-
-A. Bar labels + axis label preserves information but is awkward
-
-</p>
-
-</div>
+Furthermore, ind\_recode’s functionality allows analysts to move from a
+first-cut recode that delivers meaningful categories to fully customized
+categories.
 
 ``` r
-
-tidytitanic::passengers %>% 
-  count(survived) %>% 
-  knitr::kable(caption = "B. Column header from variable name and 0-1 categories preserves information but is awkward")
+data.frame(ind_graduated = c(T,T,F)) %>% 
+  mutate(cat_graduated  = ind_recode(ind_graduated, 
+                                     cat_false = "current"))
+#>   ind_graduated cat_graduated
+#> 1          TRUE     graduated
+#> 2          TRUE     graduated
+#> 3         FALSE       current
 ```
 
-| survived |   n |
-| -------: | --: |
-|        0 | 863 |
-|        1 | 450 |
+# Status-Quo: Analysts make a choice between directly using indicators or verbose recode
 
-B. Column header from variable name and 0-1 categories preserves
-information but is awkward
+## Current proceedures for recoding indicator variables to a categorial variable is inelegant.
 
-``` r
-
-
-tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived) %>% 
-  knitr::kable(caption = "C. Information loss with a two-way table for column variables")
-```
-
-| sex    |   0 |   1 |
-| :----- | --: | --: |
-| female | 154 | 308 |
-| male   | 709 | 142 |
-
-C. Information loss with a two-way table for column variables
-
-``` r
-
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived)
-```
-
-<div class="figure">
-
-<img src="man/figures/README-cars-2.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
-
-<p class="caption">
-
-D. Facetting directly on an indicator variable with popular ggplot2
-results in information loss
-
-</p>
-
-</div>
-
-# One-off solution: *manual indicator recode, but is repetitive*
+Current methods for recoding indicator variables is repetitive and
+verbose, as shown in the examples that follow.
 
 ``` r
 tidytitanic::passengers %>% 
@@ -174,12 +106,12 @@ ggplot() +
   facet_grid(~ ifelse(survived, "survived", "not survived"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
 
 This solution above also does not address category display ordering;
 ordering in products will be alphabetical and not reflect the F/T order
 of the source variable. An additional step to reflect the source
-variable, using a function like fct\_rev, may be required for
+variable, using a function like forcats::fct\_rev, may be required for
 consistency in reporting.
 
 ``` r
@@ -191,7 +123,165 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+
+## Direct use of indicator variables in data products makes product more difficult or impossible to interpret.
+
+Given how verbose recoding can be, analyst may choose to forego a
+recoding the variable, especially in exploratory analysis.
+
+When indicator variables are not translated to a categorical analogue in
+creating data products like tables and visuals, information is often
+awkwardly displayed and is sometimes lost. When creating tables, using
+an indicator variable directly can be awkward or insufficient for
+interpretation.
+
+Below, the column header from variable name and 0-1 categories preserves
+information but is awkward:
+
+``` r
+tidytitanic::passengers %>% 
+  count(survived) 
+#>   survived   n
+#> 1        0 863
+#> 2        1 450
+```
+
+In the following two-way table, information is completely lost:
+
+``` r
+tidytitanic::passengers %>% 
+  janitor::tabyl(sex, survived) %>% 
+  knitr::kable(caption = "C. ", format = kabel_format)
+```
+
+<table>
+
+<caption>
+
+C.
+
+</caption>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+sex
+
+</th>
+
+<th style="text-align:right;">
+
+0
+
+</th>
+
+<th style="text-align:right;">
+
+1
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+female
+
+</td>
+
+<td style="text-align:right;">
+
+154
+
+</td>
+
+<td style="text-align:right;">
+
+308
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+male
+
+</td>
+
+<td style="text-align:right;">
+
+709
+
+</td>
+
+<td style="text-align:right;">
+
+142
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>
+
+Furthermore in creating ba
+
+``` r
+library(tidyverse)
+
+tidytitanic::passengers %>% 
+  ggplot() + 
+  aes(x = survived) + 
+  geom_bar()
+```
+
+<div class="figure">
+
+<img src="man/figures/README-cars-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
+
+<p class="caption">
+
+A. Bar labels + axis label preserves information but is awkward
+
+</p>
+
+</div>
+
+``` r
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ survived)
+```
+
+<div class="figure">
+
+<img src="man/figures/README-unnamed-chunk-9-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
+
+<p class="caption">
+
+D. Facetting directly on an indicator variable with popular ggplot2
+results in information loss
+
+</p>
+
+</div>
 
 # Introducing ind\_recode *ind\_recode() function uses variable name as starting point for human-readable categories*
 
@@ -265,7 +355,7 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 # to do
 
   - change to Rlang for grabbing function name
-  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
+  - make “Y” “N” a lot stricter - right now we’re assuming a ton\! Eek\!
 
 # Basic examples: *How to use ind\_recode()*
 
@@ -410,7 +500,7 @@ ggplot() +
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
 
 ``` r
 
@@ -419,7 +509,7 @@ last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-2.png" width="100%" />
 
 ``` r
 
@@ -430,7 +520,7 @@ last_plot() +
   labs(x = NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-3.png" width="100%" />
 
 ``` r
 
@@ -441,7 +531,7 @@ ggplot() +
   facet_grid(~ ind_recode(survived))
 ```
 
-<img src="man/figures/README-unnamed-chunk-10-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-14-4.png" width="100%" />
 
 # Known Limitations: *not for use with magrittr pipe (but base pipe works\!)*
 
@@ -453,7 +543,7 @@ ggplot() +
   facet_grid(~ survived %>% ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
 
 ``` r
 
@@ -464,7 +554,7 @@ ggplot() +
   facet_grid(~ survived |> ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-15-2.png" width="100%" />
 
 -----
 
@@ -488,7 +578,7 @@ read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
   geom_bar(position = "dodge")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
 
 ``` r
 
@@ -522,7 +612,7 @@ last_plot_wiped() +
   geom_bar(position = "fill")
 ```
 
-<img src="man/figures/README-unnamed-chunk-12-2.png" width="100%" /> \#
+<img src="man/figures/README-unnamed-chunk-16-2.png" width="100%" /> \#
 learned along the way: `as_factor()` has different behavior than
 `as.factor()`
 

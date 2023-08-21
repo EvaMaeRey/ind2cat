@@ -1,45 +1,17 @@
----
-output: github_document
----
+{{ind2cat}} can help analysts translate from an indicator variables to categorical variables that can be used in reporting products.  By default, the categorical variable is created from the indicator variable name, resulting in a light weight syntax.
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+ind2cat's ind_recode function saves time by automatically creating meaningful categories based on a variable name as shown below:
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-
-
-kabel_format <- "html"
-```
-
-<!-- badges: start -->
-<!-- badges: end -->
-
-# Abstract
-
-Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted.  They concisely encode information about the presence or not of a condition for observational units.  In exploratory analyses indicator variables, analysts often make a choice between crafting an categorical variable whose values preserve the information that the indicator variable column name holds, or using an indicator variable as-is; the later choice may be motivated by time savings.  {{ind2cat}} can help analysts translate from an indicator variables to categorical variables that can be used in reporting products.  By default, the categorical variable is created from the indicator variable name, resulting in a light weight syntax.
-
-
-<!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
-
-
-
-
-
-
-# Introduction
-
-Recoding indicator variable values to meaningful and appropriately ordered categories often involves redundancy. 
-
-*more description of example here*
-
-```{r, eval = T, message=F, warning=F}
+```{r, eval = T}
 library(tidyverse)
+library(indicatorrecode)
 
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ind_recode(ind_graduated))
+```
+This can replace the less succinct approach:
+
+```{r, eval = T}
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ifelse(ind_graduated, 
                                  "graduated", 
@@ -47,31 +19,46 @@ data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated = fct_rev(cat_graduated))  
 ```
 
-ind2cat's ind_recode function avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
 
-```{r, eval = T, message=F, warning=F}
-library(indicatorrecode)
+# Background:  *indicator variables a common and well understood way to store information.*
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
+Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted.  They concisely encode information about the presence or not of a condition for observational units.
+
+see.. https://emilyriederer.netlify.app/post/column-name-contracts/
+
+In exploratory analyses indicator variables, analysts often make a choice between crafting an categorical variable whose values preserve the information that the indicator variable *name* holds, or using an indicator variable as-is; the later choice may be motivated by time savings.
+
+# Problem:  Direct use of indicator variables in data products.
+
+When indicator variables are not translated to a categorical analogue in creating data products like tables and visuals, information is often awkwardly displayed and is sometimes lost. 
+
+```{r cars, fig.cap= c( "A. Bar labels + axis label preserves information but is awkward", "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss")}
+library(tidyverse)
+
+tidytitanic::passengers %>% 
+  ggplot() + 
+  aes(x = survived) + 
+  geom_bar()
+
+tidytitanic::passengers %>% 
+  count(survived) %>% 
+  knitr::kable(caption = "B. Column header from variable name and 0-1 categories preserves information but is awkward")
+
+
+tidytitanic::passengers %>% 
+  janitor::tabyl(sex, survived) %>% 
+  knitr::kable(caption = "C. Information loss with a two-way table for column variables")
+
+tidytitanic::passengers %>% 
+ggplot() + 
+  aes(x = sex) + 
+  geom_bar() + 
+  facet_grid(~ survived)
 ```
 
-Furthermore, ind_recode's functionality allows analysts to move from a first-cut recode that delivers meaningful categories to fully customized categories.
+# One-off solution:  *manual indicator recode, but is repetitive*
 
 
-```{r}
-data.frame(ind_graduated = c(T,T,F)) %>% 
-  mutate(cat_graduated  = ind_recode(ind_graduated, 
-                                     cat_false = "current"))
-```
-
-
-
-# Status-Quo: Analysts make a choice between directly using indicators or verbose recode
-
-## Current proceedures for recoding indicator variables to a categorial variable is inelegant.
-
-Current methods for recoding indicator variables is repetitive and verbose, as shown in the examples that follow. 
 
 ```{r}
 tidytitanic::passengers %>% 
@@ -86,7 +73,7 @@ ggplot() +
   facet_grid(~ ifelse(survived, "survived", "not survived"))
 ```
 
-This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistency in reporting.
+This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like fct_rev, may be required for consistency in reporting.
 
 ```{r}
 data.frame(ind_daytime = c(T, F, T, T)) %>% 
@@ -97,50 +84,9 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 ```
 
-## Direct use of indicator variables in data products makes product more difficult or impossible to interpret.
-
-Given how verbose recoding can be, analyst may choose to forego a recoding the variable, especially in exploratory analysis.
-
-When indicator variables are not translated to a categorical analogue in creating data products like tables and visuals, information is often awkwardly displayed and is sometimes lost. 
-When creating tables, using an indicator variable directly can be awkward or insufficient for interpretation.
-
-Below, the column header from variable name and 0-1 categories preserves information but is awkward:
-
-```{r}
-tidytitanic::passengers %>% 
-  count(survived) 
-```
-
-In the following two-way table, information is completely lost:
-
-```{r}
-tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived) %>% 
-  knitr::kable(caption = "C. ", format = kabel_format)
-```
-
-Furthermore in creating ba
-
-```{r cars, fig.cap="A. Bar labels + axis label preserves information but is awkward"}
-library(tidyverse)
-
-tidytitanic::passengers %>% 
-  ggplot() + 
-  aes(x = survived) + 
-  geom_bar()
-```
-
-```{r, fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"}
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived)
-```
-
-
-
 # Introducing ind_recode  *ind_recode() function uses variable name as starting point for human-readable categories*
+
+
   
 <!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. -->
   
@@ -155,7 +101,7 @@ code = readLines("R/ind_recode.R")
 # to do
 
 - change to Rlang for grabbing function name
-- make "Y" "N" a lot stricter - right now we're assuming a ton! Eek!
+- make "Y" "N" a lot stricter - right now we're assuming a ton!
 
 # Basic examples:  *How to use ind_recode()* 
 

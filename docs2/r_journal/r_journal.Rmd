@@ -1,0 +1,109 @@
+---
+title: Concise indicator variable recoding with ind2cat
+author:
+  # see ?rjournal_article for more information
+  - name: Evangeline Reynolds
+    affiliation: Affiliation
+    address:
+    - line 1
+    - line 2
+    url: https://journal.r-project.org
+    orcid: 0000-0002-9079-593X
+    email:  author1@work
+abstract: >
+  Indicator variables are often used in data analyses given the ease with which they are created, stored, and interpreted.  They concisely encode information about the presence or not of a condition for observational units. In exploratory analyses indicator variables, analysts often make a choice between crafting an categorical variable whose values preserve the information that the indicator variable column name holds, or using an indicator variable as-is; the later choice may be motivated by time savings.  {{ind2cat}} can help analysts translate from an indicator variables to categorical variables that can be used in reporting products.  By default, the categorical variable is created from the indicator variable name, resulting in a light weight syntax.
+preamble: |
+  % Any extra LaTeX you need in the preamble
+  
+# per R journal requirement, the bib filename should be the same as the output 
+# tex file. Don't forget to rename the bib file and change this example value.
+bibliography: RJreferences.bib
+
+output: rticles::rjournal_article
+---
+
+<!-- ## Introduction -->
+
+<!-- Introductory section which may include references in parentheses -->
+<!-- [@R], or cite a reference such as @R in the text. -->
+
+<!-- ## Section title in sentence case -->
+
+<!-- This section may contain a figure such as Figure \ref{fig:Rlogo}. -->
+
+<!-- ```{r, Rlogo, echo=FALSE, fig.cap='The logo of R.', out.width='2in', fig.align='center', fig.pos='htbp'} -->
+<!-- knitr::include_graphics('Rlogo-5.png') -->
+<!-- ``` -->
+
+<!-- ## Another section -->
+
+<!-- There will likely be several sections, perhaps including code snippets, such as: -->
+
+<!-- ```{r} -->
+<!-- x <- 1:10 -->
+<!-- plot(x) -->
+<!-- library(tidyverse) -->
+<!-- ``` -->
+
+<!-- ## Summary -->
+
+<!-- This file is only a basic article template. For full details of _The R Journal_ style and information on how to prepare your article for submission, see the [Instructions for Authors](https://journal.r-project.org/share/author-guide.pdf). -->
+
+<!-- ### About this format and the R Journal requirements -->
+
+<!-- `rticles::rjournal_article` will help you build the correct files requirements:  -->
+
+<!-- * A R file will be generated automatically using `knitr::purl` - see -->
+<!-- https://bookdown.org/yihui/rmarkdown-cookbook/purl.html for more information. -->
+<!-- * A tex file will be generated from this Rmd file and correctly included in -->
+<!-- `RJwapper.tex` as expected to build `RJwrapper.pdf`. -->
+<!-- * All figure files will be kept in the default rmarkdown `*_files` folder. This -->
+<!-- happens because `keep_tex = TRUE` by default in `rticles::rjournal_article` -->
+<!-- * Only the bib filename is to modifed. An example bib file is included in the -->
+<!-- template (`RJreferences.bib`) and you will have to name your bib file as the -->
+<!-- tex, R, and pdf files. -->
+
+## Introduction
+
+```{r, include=F}
+knitr::opts_chunk$set(message = F, 
+                      warning = F, 
+                      comment = "    ", 
+                      out.width = "69%")
+kabel_format <- "latex"
+
+
+library(magrittr)
+readLines("../../README.Rmd")  %>%  .[21:length(.)] %>% 
+  writeLines("../../readme_extract.Rmd")
+```
+
+```{r, child = "../../readme_extract.Rmd"}
+```
+
+```{r}
+# unlink("../../temp.Rmd")
+```
+
+
+```{r, eval = F}
+rmd_parse <- function(file = "../../README.Rmd"){
+  
+  readLines(file) %>% 
+    data.frame(text = .) %>% 
+    dplyr::mutate(ind_section_header = stringr::str_detect(text, "^#"), .before = 1) %>% 
+    dplyr::mutate(num_section_level = stringr::str_count(stringr::str_extract(text, "^#+"),"#") ) %>% 
+    dplyr::mutate(num_section = cumsum(ind_section_header)) %>% 
+    # dplyr::filter(ind_section_header) %>% 
+    dplyr::mutate(name_section = ifelse(ind_section_header, text, NA) %>% stringr::str_remove("#+ ") %>% tolower() %>% stringr::str_replace_all("\\s", "_")) ->
+  parsed
+  
+  parsed %>% 
+    dplyr::group_by(num_section) %>% 
+    dplyr::summarize(text %>% paste0(collapse = "\\n"))
+    
+  
+}
+
+
+```
