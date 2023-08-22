@@ -7,6 +7,15 @@ output: html_document
 
 
 
+
+---
+
+```{r}
+knitr::opts_chunk$set(eval = T)
+
+```
+
+
 ```{r, include = T}
 library(tidyverse)
 readLines("https://raw.githubusercontent.com/clauswilke/dviz.supp/master/R/stamp.R") %>% 
@@ -51,4 +60,74 @@ p2 %>% judge(family = "Helvetica", color = "red", alpha = .9, label = "bad", fon
 ```
 
 
+
+
+```{r chunk1, eval = F}
+tidytitanic::passengers %>% 
+  ggplot() + 
+  aes(x = ind_recode(survived)) + 
+  geom_bar() + 
+  labs(x = NULL)
+```
+
+
+
+
+
+```{r chunk, eval = F}
+tidytitanic::passengers %>% 
+  ggplot() + 
+  aes(x = ifelse(survived, 
+                 "survived",
+                 "not survived")) + 
+  geom_bar() + 
+  labs(x = NULL)
+```
+
+
+
+```{r}
+knitr::knit_code$get("chunk") |>  
+  paste(collapse = "\n") ->
+text
+
+
+# text <- "tidytitanic::passengers %>% \n  mutate(adult = age >=18 ) %>% \n  filter(!is.na(age)) %>% \nggplot() + \n  aes(x = adult) + \n  geom_bar()"
+library(ggplot2)
+ggplot(data = data.frame(x = c(0, 1), y = c(0,1))) +
+  aes(x = x, y = y) +
+  geom_blank() +
+  annotate("text", label = text, x = 0, y = 1, hjust = 0, vjust = 1, size = 5, family = "Courier") + 
+  theme_void() ->
+syntax_plot
+
+syntax_plot %>% judge(family = "Helvetica", color = "red", alpha = .9, label = "repetitive", fontface = "bold")
+  
+```
+
+
+```{r, eval = F}
+sink("temp.txt")
+library(magrittr)
+tidytitanic::passengers |> 
+  janitor::tabyl(sex, survived)
+sink()
+```
+
+```{r}
+readLines("temp.txt") %>% 
+  paste(collapse = "\n")->
+  text
+
+
+library(ggplot2)
+ggplot(data = data.frame(x = c(0, 1), y = c(0,1))) +
+  aes(x = x, y = y) +
+  geom_blank() +
+  annotate("text", label = text, x = 0, y = 1, hjust = 0, vjust = 1, size = 5, family = "Courier") + 
+  theme_void() ->
+output_plot
+
+output_plot %>% judge(family = "Helvetica", color = "red", alpha = .9, label = "awkward", fontface = "bold")
+```
 
