@@ -1,10 +1,20 @@
+1) Is there already a solution
+2) unsure if there are fundamental problems with this approach
+
+## Some things to move ind2cat out of proof of concept phase
+
+- change to Rlang for grabbing function name (Claus Wilke)
+- left join instead of ifelse to make code more performant (Emily Rederer)
+- make "Y" "N" a lot stricter - right now we're assuming a ton!  Danger.
+
+
 # Introduction
 
 Recoding indicator variable values to meaningful and appropriately ordered categories often involves redundancy. 
 
 *more description of example here*
 
-```{r, eval = T, message=F, warning=F}
+```{r statusquo, eval = T, message=F, warning=F}
 library(tidyverse)
 
 data.frame(ind_graduated = c(T,T,F)) |>
@@ -16,7 +26,7 @@ data.frame(ind_graduated = c(T,T,F)) |>
 
 ind2cat's ind_recode function avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
 
-```{r, eval = T, message=F, warning=F}
+```{r proposed, eval = T, message=F, warning=F}
 library(ind2cat)
 
 data.frame(ind_graduated = c(T,T,F)) |>
@@ -26,7 +36,7 @@ data.frame(ind_graduated = c(T,T,F)) |>
 Furthermore, ind_recode's functionality allows analysts to move from a first-cut recode that delivers meaningful categories to fully customized categories.
 
 
-```{r}
+```{r proposed_customized}
 data.frame(ind_graduated = c(T,T,F)) %>% 
   mutate(cat_graduated  = ind_recode(ind_graduated, 
                                      cat_false = "current"))
@@ -50,7 +60,7 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived"))
+  facet_grid(~ ifelse(survived, "survived", "not survived")) 
 ```
 
 This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistency in reporting.
@@ -119,10 +129,7 @@ code = readLines("R/ind_recode.R")
 
 ```
 
-# to do
 
-- change to Rlang for grabbing function name
-- make "Y" "N" a lot stricter - right now we're assuming a ton! Eek!
 
 # Basic examples:  *How to use ind_recode()* 
 
@@ -233,13 +240,7 @@ ggplot() +
 ```
 
 
----
 
-Afterward
-
-# Other questions: *1) Is there already a solution and 2) fundamental problems with this approach?*
-
-Please lemme know 'em! 
 
 ---
 

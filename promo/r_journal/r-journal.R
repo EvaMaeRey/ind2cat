@@ -16,7 +16,7 @@ readLines("../../README.Rmd")  %>%  .[34:length(.)] %>%
 
 ## ---- child = "../../readme_extract.Rmd"--------------------------------------
 
-## ---- eval = T, message=F, warning=F------------------------------------------
+## ----statusquo, eval = T, message=F, warning=F--------------------------------
 library(tidyverse)
 
 data.frame(ind_graduated = c(T,T,F)) |>
@@ -26,14 +26,14 @@ data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated = fct_rev(cat_graduated))  
 
 
-## ---- eval = T, message=F, warning=F------------------------------------------
+## ----proposed, eval = T, message=F, warning=F---------------------------------
 library(ind2cat)
 
 data.frame(ind_graduated = c(T,T,F)) |>
   mutate(cat_graduated  = ind_recode(ind_graduated))
 
 
-## -----------------------------------------------------------------------------
+## ----proposed_customized------------------------------------------------------
 data.frame(ind_graduated = c(T,T,F)) %>% 
   mutate(cat_graduated  = ind_recode(ind_graduated, 
                                      cat_false = "current"))
@@ -49,7 +49,7 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived"))
+  facet_grid(~ ifelse(survived, "survived", "not survived")) 
 
 
 ## -----------------------------------------------------------------------------
@@ -227,7 +227,7 @@ c("Y", "N") %>% as.factor()
 # unlink("../../temp.Rmd")
 
 
-## ---- eval = F----------------------------------------------------------------
+## ----chunk, eval = F----------------------------------------------------------
 #> rmd_parse <- function(file = "../../README.Rmd"){
 #> 
 #>   readLines(file) %>%
@@ -245,6 +245,5 @@ c("Y", "N") %>% as.factor()
 #> 
 #> 
 #> }
-#> 
 #> 
 

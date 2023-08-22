@@ -10,16 +10,36 @@
 Indicator variables are often used in data analyses given the ease which
 with they are created, stored and interpreted. They concisely encode
 information about the presence or not of a condition for observational
-units. In exploratory analyses indicator variables, analysts often make
-a choice between crafting an categorical variable whose values preserve
-the information that the indicator variable column name holds, or using
-an indicator variable as-is; the later choice may be motivated by time
-savings. {{ind2cat}} can help analysts translate from an indicator
-variables to categorical variables that can be used in reporting
-products. By default, the categorical variable is created from the
-indicator variable name, resulting in a light weight syntax.
+units. The variable name encapsulates the information about the true
+condition, the variable’s values (TRUE and FALSE, 1 or 0, “Yes” or
+“No”), indicate if the condition is true for the observational unit.
+When using indicator variables to use in summary products, analysts
+often make a choice between using an indicator variable as-is or
+crafting categorical variables where values can be directly interpreted.
+Using the indicator variable as-is may be motivated by time savings.
+{{ind2cat}} can help analysts concisely translate indicator variables to
+categorical variables for reporting products, yielding more polished
+outputs even in the exploratory analysis stage. By default, ind2cat
+creates the categorical variable from the indicator variable name,
+resulting in a light weight syntax.
 
 <!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
+
+# Issues up front
+
+## questions
+
+0)  ind2cat is experimental
+1)  Is there already a solution
+2)  unsure if there are fundamental problems with this approach
+
+## Some things to move ind2cat out of proof of concept phase
+
+  - change to Rlang for grabbing function name (Claus Wilke)
+  - left join instead of ifelse to make code more performant (Emily
+    Rederer)
+  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
+    Danger.
 
 # Introduction
 
@@ -103,10 +123,10 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived"))
+  facet_grid(~ ifelse(survived, "survived", "not survived")) 
 ```
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
 This solution above also does not address category display ordering;
 ordering in products will be alphabetical and not reflect the F/T order
@@ -123,7 +143,7 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
 ## Direct use of indicator variables in data products makes product more difficult or impossible to interpret.
 
@@ -272,7 +292,7 @@ ggplot() +
 
 <div class="figure">
 
-<img src="man/figures/README-unnamed-chunk-9-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
+<img src="man/figures/README-unnamed-chunk-6-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
 
 <p class="caption">
 
@@ -351,11 +371,6 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 
 }
 ```
-
-# to do
-
-  - change to Rlang for grabbing function name
-  - make “Y” “N” a lot stricter - right now we’re assuming a ton\! Eek\!
 
 # Basic examples: *How to use ind\_recode()*
 
@@ -500,7 +515,7 @@ ggplot() +
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-1.png" width="100%" />
 
 ``` r
 
@@ -509,7 +524,7 @@ last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-2.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-2.png" width="100%" />
 
 ``` r
 
@@ -520,7 +535,7 @@ last_plot() +
   labs(x = NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-3.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-3.png" width="100%" />
 
 ``` r
 
@@ -531,7 +546,7 @@ ggplot() +
   facet_grid(~ ind_recode(survived))
 ```
 
-<img src="man/figures/README-unnamed-chunk-14-4.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-11-4.png" width="100%" />
 
 # Known Limitations: *not for use with magrittr pipe (but base pipe works\!)*
 
@@ -543,7 +558,7 @@ ggplot() +
   facet_grid(~ survived %>% ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-12-1.png" width="100%" />
 
 ``` r
 
@@ -554,15 +569,7 @@ ggplot() +
   facet_grid(~ survived |> ind_recode())
 ```
 
-<img src="man/figures/README-unnamed-chunk-15-2.png" width="100%" />
-
------
-
-Afterward
-
-# Other questions: *1) Is there already a solution and 2) fundamental problems with this approach?*
-
-Please lemme know ’em\!
+<img src="man/figures/README-unnamed-chunk-12-2.png" width="100%" />
 
 -----
 
@@ -578,7 +585,7 @@ read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/d
   geom_bar(position = "dodge")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-1.png" width="100%" />
+<img src="man/figures/README-unnamed-chunk-13-1.png" width="100%" />
 
 ``` r
 
@@ -612,7 +619,7 @@ last_plot_wiped() +
   geom_bar(position = "fill")
 ```
 
-<img src="man/figures/README-unnamed-chunk-16-2.png" width="100%" /> \#
+<img src="man/figures/README-unnamed-chunk-13-2.png" width="100%" /> \#
 learned along the way: `as_factor()` has different behavior than
 `as.factor()`
 
