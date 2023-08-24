@@ -10,36 +10,14 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../README.Rmd")  %>%  .[34:length(.)] %>% 
+readLines("../../README.Rmd")  %>%  .[44:length(.)] %>% 
   writeLines("../../readme_extract.Rmd")
 
 
 ## ---- child = "../../readme_extract.Rmd"--------------------------------------
 
-## ----statusquo, eval = T, message=F, warning=F--------------------------------
-library(tidyverse)
-
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ifelse(ind_graduated, 
-                                 "graduated", 
-                                 "not graduated")) |>
-  mutate(cat_graduated = fct_rev(cat_graduated))  
-
-
-## ----proposed, eval = T, message=F, warning=F---------------------------------
-library(ind2cat)
-
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
-
-
-## ----proposed_customized------------------------------------------------------
-data.frame(ind_graduated = c(T,T,F)) %>% 
-  mutate(cat_graduated  = ind_recode(ind_graduated, 
-                                     cat_false = "current"))
-
-
 ## -----------------------------------------------------------------------------
+library(tidyverse)
 tidytitanic::passengers %>% 
   tibble() %>% 
   mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
@@ -84,60 +62,52 @@ tidytitanic::passengers %>%
 ## ---- fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"----
 tidytitanic::passengers %>% 
 ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
+  aes(x = age) + 
+  geom_histogram() + 
   facet_grid(~ survived)
 
 
-## ---- echo = F----------------------------------------------------------------
-code = readLines("R/ind_recode.R")
+## ----statusquo, eval = T, message=F, warning=F--------------------------------
+library(tidyverse)
+
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ifelse(ind_graduated, 
+                                 "graduated", 
+                                 "not graduated")) |>
+  mutate(cat_graduated = fct_rev(cat_graduated))  
 
 
-## ---- code = code, eval = T---------------------------------------------------
+## ----proposed, eval = T, message=F, warning=F---------------------------------
+library(ind2cat)
 
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ind_recode(ind_graduated))
+
+
+## ----proposed_customized------------------------------------------------------
+data.frame(ind_graduated = c(T,T,F)) %>% 
+  mutate(cat_graduated  = ind_recode(ind_graduated, 
+                                     cat_false = "current"))
 
 
 ## -----------------------------------------------------------------------------
-library(tibble)
-tibble(ind_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c(T,T,F)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c("Y", "N")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
 
 tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c("yes", "no")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-
-
-## -----------------------------------------------------------------------------
-tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
-
+  mutate(cat_grad  = ind_recode(ind_grad, 
+                                cat_true = "graduated"))
 tibble(ind_grad = c(T,T,F)) %>%
   mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
 
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
 
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated"))
-
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated", 
-                                cat_false = "enrolled"))
-
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
+
+tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
+
 
 
 ## -----------------------------------------------------------------------------
@@ -162,88 +132,20 @@ ggplot() +
   geom_bar() + 
   facet_grid(~ ind_recode(survived))
 
-
-
-## -----------------------------------------------------------------------------
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived %>% ind_recode())
-
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived |> ind_recode())
-
-
-## -----------------------------------------------------------------------------
-read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv") %>% 
-  rename(spam = yesno) %>% 
-  ggplot() + 
-  aes(fill = ind_recode(bang>0), x = ind_recode(spam)) + 
-  geom_bar(position = "dodge")
-
-remove_layers <- function(plot, index = NULL){
-  
-  if(is.null(index)){
-  plot$layers <- NULL
-  }else{
-  plot$layers[[index]] <- NULL
-  }
-  
- plot
-  
-}
-
-last_plot_wiped <- function(index = NULL){
-  
-  plot <- last_plot()
-  
-  if(is.null(index)){
-  plot$layers <- NULL
-  }else{
-  plot$layers[[index]] <- NULL
-  }
-  
- plot
-  
-}
-
-last_plot_wiped() +
-  geom_bar(position = "fill")
-
+tidytitanic::passengers %>%
+  mutate(cat_survived = ind_recode(survived)) %>% 
+  janitor::tabyl(sex, cat_survived) %>% 
+  janitor::adorn_percentages() %>% 
+  janitor::adorn_pct_formatting() %>% 
+  janitor::adorn_ns(position = "rear")
 
 
 
 ## -----------------------------------------------------------------------------
-c("Y", "N") %>% as_factor()
-c("Y", "N") %>% as.factor()
+readLines("R/ind_recode.R") -> implementation
 
 
+## ---- code = implementation, eval= F------------------------------------------
+#> NA
 
-## -----------------------------------------------------------------------------
-# unlink("../../temp.Rmd")
-
-
-## ----chunk, eval = F----------------------------------------------------------
-#> rmd_parse <- function(file = "../../README.Rmd"){
-#> 
-#>   readLines(file) %>%
-#>     data.frame(text = .) %>%
-#>     dplyr::mutate(ind_section_header = stringr::str_detect(text, "^#"), .before = 1) %>%
-#>     dplyr::mutate(num_section_level = stringr::str_count(stringr::str_extract(text, "^#+"),"#") ) %>%
-#>     dplyr::mutate(num_section = cumsum(ind_section_header)) %>%
-#>     # dplyr::filter(ind_section_header) %>%
-#>     dplyr::mutate(name_section = ifelse(ind_section_header, text, NA) %>% stringr::str_remove("#+ ") %>% tolower() %>% stringr::str_replace_all("\\s", "_")) ->
-#>   parsed
-#> 
-#>   parsed %>%
-#>     dplyr::group_by(num_section) %>%
-#>     dplyr::summarize(text %>% paste0(collapse = "\\n"))
-#> 
-#> 
-#> }
-#> 
 

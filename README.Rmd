@@ -21,20 +21,20 @@ kabel_format <- "html"
 
 # Abstract
 
-Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted.  They concisely encode information about the presence or not of a condition for observational units.  The variable name encapsulates the information about the true condition, the variable's values (TRUE and FALSE, 1 or 0, "Yes" or "No"), indicate if the condition is true for the observational unit.  When using indicator variables to use in summary products, analysts often make a choice between using an indicator variable as-is or crafting categorical variables where values can be directly interpreted.  Using the indicator variable as-is may be motivated by time savings.  {{ind2cat}} can help analysts concisely translate indicator variables to categorical variables for reporting products, yielding more polished outputs even in the exploratory analysis stage.  By default, ind2cat creates the categorical variable from the indicator variable name, resulting in a light weight syntax.
+Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted.  They concisely encode information about the presence or not of a condition for observational units.  The variable name encapsulates the information about the true condition, the variable's values (TRUE and FALSE, 1 or 0, "Yes" or "No"), indicate if the condition is true for the observational unit.  When using indicator variables to use in summary products, analysts often make a choice between using an indicator variable as-is or crafting categorical variables where values can be directly interpreted.  Using the indicator variable as-is may be motivated by time savings, but yeilds poor results in summary products.  {{ind2cat}} can help analysts concisely translate indicator variables to categorical variables for reporting products, yielding more polished outputs.  By default, ind2cat creates the categorical variable from the indicator variable name, resulting in a light weight syntax.
 
 <!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
 
 
 # Issues up front
 
-## questions
+## confessions
 
-0) ind2cat is experimental
-1) Is there already a solution
+0) ind2cat is experimental, proof of concept phase
+1) I'm not sure if there there is already a solution
 2) unsure if there are fundamental problems with this approach
 
-## Some things to move ind2cat out of proof of concept phase
+## to do to move ind2cat out of proof of concept phase
 
 - change to Rlang for grabbing function name (Claus Wilke)
 - left join instead of ifelse to make code more performant (Emily Rederer)
@@ -43,47 +43,12 @@ Indicator variables are often used in data analyses given the ease which with th
 
 # Introduction
 
-Recoding indicator variable values to meaningful and appropriately ordered categories often involves redundancy. 
+Using current analytic tools analysts make a choice between directly using indicators or verbose recode.  Current proceedures for recoding indicator variables to a categorial variable is repetitive, but forgoing a recode and using indicator variables directly yeilds hard-to-interpret summary products. 
 
-*more description of example here*
-
-```{r statusquo, eval = T, message=F, warning=F}
-library(tidyverse)
-
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ifelse(ind_graduated, 
-                                 "graduated", 
-                                 "not graduated")) |>
-  mutate(cat_graduated = fct_rev(cat_graduated))  
-```
-
-ind2cat's ind_recode function avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
-
-```{r proposed, eval = T, message=F, warning=F}
-library(ind2cat)
-
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
-```
-
-Furthermore, ind_recode's functionality allows analysts to move from a first-cut recode that delivers meaningful categories to fully customized categories.
-
-
-```{r proposed_customized}
-data.frame(ind_graduated = c(T,T,F)) %>% 
-  mutate(cat_graduated  = ind_recode(ind_graduated, 
-                                     cat_false = "current"))
-```
-
-
-
-# Status-Quo: Analysts make a choice between directly using indicators or verbose recode
-
-## Current proceedures for recoding indicator variables to a categorial variable is inelegant.
-
-Current methods for recoding indicator variables is repetitive and verbose, as shown in the examples that follow. 
+Below is demonstrated how an analyst might current recode and indicator variable; this method is repetitive: 
 
 ```{r}
+library(tidyverse)
 tidytitanic::passengers %>% 
   tibble() %>% 
   mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
@@ -107,21 +72,18 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 ```
 
-## Direct use of indicator variables in data products makes product more difficult or impossible to interpret.
-
 Given how verbose recoding can be, analyst may choose to forego a recoding the variable, especially in exploratory analysis.
 
-When indicator variables are not translated to a categorical analogue in creating data products like tables and visuals, information is often awkwardly displayed and is sometimes lost. 
-When creating tables, using an indicator variable directly can be awkward or insufficient for interpretation.
+However, when indicator variables are used directly in data summary products like tables and visuals, information is often awkwardly displayed and is sometimes lost. 
 
-Below, the column header from variable name and 0-1 categories preserves information but is awkward:
+Below, the column header comes from the indicator variable name allowing savvy readers to interpret the output, but interpretation is awkward:
 
 ```{r}
 tidytitanic::passengers %>% 
   count(survived) 
 ```
 
-In the following two-way table, information is completely lost:
+In the following two-way table, information is completely lost due to using the indicator variable directly:
 
 ```{r}
 tidytitanic::passengers %>% 
@@ -129,7 +91,7 @@ tidytitanic::passengers %>%
   knitr::kable(caption = "C. ", format = kabel_format)
 ```
 
-Furthermore in creating ba
+In the following visual summary of the data, where the indicator variable is directly used, interpretation is awkward.
 
 ```{r cars, fig.cap="A. Bar labels + axis label preserves information but is awkward"}
 library(tidyverse)
@@ -140,97 +102,97 @@ tidytitanic::passengers %>%
   geom_bar()
 ```
 
+If used as a faceting variable with the ggplot2 library, information is lost and the graph is not directly interpable. 
+
+
 ```{r, fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"}
 tidytitanic::passengers %>% 
 ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
+  aes(x = age) + 
+  geom_histogram() + 
   facet_grid(~ survived)
 ```
 
 
 
-# Introducing ind_recode  *ind_recode() function uses variable name as starting point for human-readable categories*
+# Introducing ind2cat::ind_recode  
+
+The ind2cat::ind_recode() function uses variable name to automatically derive human-readable, and appropriately ordered categories.
   
 <!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. -->
-  
-```{r, echo = F}
-code = readLines("R/ind_recode.R")
-```
-  
-```{r, code = code, eval = T}
 
-```
+To clearly compare the new method, we reiterate the status quo with a toy example:
 
+```{r statusquo, eval = T, message=F, warning=F}
+library(tidyverse)
 
-
-# Basic examples:  *How to use ind_recode()* 
-
-```{r}
-library(tibble)
-tibble(ind_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c(T,T,F)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c("Y", "N")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
-tibble(ind_grad = c("yes", "no")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad))
-
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ifelse(ind_graduated, 
+                                 "graduated", 
+                                 "not graduated")) |>
+  mutate(cat_graduated = fct_rev(cat_graduated))  
 ```
 
+Below we contrast this with the use of ind2cat's ind_recode function which avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
 
-# Customizability
+```{r proposed, eval = T, message=F, warning=F}
+library(ind2cat)
 
-We believe that ind_recode is useful in quickly translating to a human understandable outcome.  
+data.frame(ind_graduated = c(T,T,F)) |>
+  mutate(cat_graduated  = ind_recode(ind_graduated))
+```
 
-However, addition functionality allows analysts to fully specify their preferences about the categories outputted.  
+The indicator variable can be populated with TRUE/FALSE values as well as 1/0 or "Yes"/"No" (and variants 'y/n' for example).
 
 
-- var_prefix a character string that will be ignored when creating the categorical variable
-- negator a character string used to create cat_false when cat_false is NULL, default is 'not'
+Furthermore, while ind_recode default functionality allows analysts to move from its first-cut human-readable recode, it also allows fully customized categories via adjustment of the functions parameters.
+
 - cat_true a character string string to be used place of  T/1/"Yes" for the categorical variable output, if NULL the category is automatically generated from the variable name
+
+
+- negator a character string used to create cat_false when cat_false is NULL, default is 'not'
+
+
 - cat_false a character string string to be used place of  F/0/"No" for the categorical variable output, if NULL the category is automatically generated from cat_true and the negator
+
+
 - rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE
 
+- var_prefix a character string that will be ignored when creating the categorical variable
 
 
-## Customization examples
+
+```{r proposed_customized}
+data.frame(ind_graduated = c(T,T,F)) %>% 
+  mutate(cat_graduated  = ind_recode(ind_graduated, 
+                                     cat_false = "current"))
+```
+
 
 
 ```{r}
-tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
 
+tibble(ind_grad = c("y", "n")) %>%
+  mutate(cat_grad  = ind_recode(ind_grad, 
+                                cat_true = "graduated"))
 tibble(ind_grad = c(T,T,F)) %>%
   mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
 
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
 
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated"))
-
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated", 
-                                cat_false = "enrolled"))
-
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
+
+tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
+
 ```
 
 ## Use in data products like figures and tables
 
-
+In what follows, we show ind2cat's use in summary products, which is a main motivation for ind2cat.
 
 ```{r}
 tidytitanic::passengers %>% 
@@ -254,74 +216,25 @@ ggplot() +
   geom_bar() + 
   facet_grid(~ ind_recode(survived))
 
+tidytitanic::passengers %>%
+  mutate(cat_survived = ind_recode(survived)) %>% 
+  janitor::tabyl(sex, cat_survived) %>% 
+  janitor::adorn_percentages() %>% 
+  janitor::adorn_pct_formatting() %>% 
+  janitor::adorn_ns(position = "rear")
+
 ```
 
-# Known Limitations:  *not for use with magrittr pipe (but base pipe works!)*
+
+# Implementation details
 
 ```{r}
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived %>% ind_recode())
+readLines("R/ind_recode.R") -> implementation
+```
 
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ survived |> ind_recode())
+```{r, code = implementation, eval= F}
 ```
 
 
 
 
----
-
-# worked example with tidytuesday data, Spam email
-
-https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-08-15
-
-```{r}
-read.csv("https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv") %>% 
-  rename(spam = yesno) %>% 
-  ggplot() + 
-  aes(fill = ind_recode(bang>0), x = ind_recode(spam)) + 
-  geom_bar(position = "dodge")
-
-remove_layers <- function(plot, index = NULL){
-  
-  if(is.null(index)){
-  plot$layers <- NULL
-  }else{
-  plot$layers[[index]] <- NULL
-  }
-  
- plot
-  
-}
-
-last_plot_wiped <- function(index = NULL){
-  
-  plot <- last_plot()
-  
-  if(is.null(index)){
-  plot$layers <- NULL
-  }else{
-  plot$layers[[index]] <- NULL
-  }
-  
- plot
-  
-}
-
-last_plot_wiped() +
-  geom_bar(position = "fill")
-
-
-```
-# learned along the way: `as_factor()` has different behavior than `as.factor()`
-
-```{r}
-c("Y", "N") %>% as_factor()
-c("Y", "N") %>% as.factor()
-```
