@@ -16,21 +16,27 @@ readLines("../../README.Rmd")  %>%  .[44:length(.)] %>%
 
 ## ---- child = "../../readme_extract.Rmd"--------------------------------------
 
-## -----------------------------------------------------------------------------
+## ----manipulation_status_quo--------------------------------------------------
 library(tidyverse)
 tidytitanic::passengers %>% 
   tibble() %>% 
-  mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
+  mutate(cat_survived = ifelse(survived, 
+                               "survived", 
+                               "not survived"), 
          .before = 1)
 
+
+## ----visual_status_quo--------------------------------------------------------
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived")) 
+  facet_grid(~ ifelse(survived, 
+                      "survived", 
+                      "not survived")) 
 
 
-## -----------------------------------------------------------------------------
+## ----visual_status_quo_order--------------------------------------------------
 data.frame(ind_daytime = c(T, F, T, T)) %>% 
     mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
   mutate(cat_survived = fct_rev(cat_survived)) %>% 
@@ -39,18 +45,17 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 
 
-## -----------------------------------------------------------------------------
+## ----direct_table_awkward-----------------------------------------------------
 tidytitanic::passengers %>% 
   count(survived) 
 
 
-## -----------------------------------------------------------------------------
+## ----direct_table_loss--------------------------------------------------------
 tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived) %>% 
-  knitr::kable(caption = "C. ", format = kabel_format)
+  janitor::tabyl(sex, survived)
 
 
-## ----cars, fig.cap="A. Bar labels + axis label preserves information but is awkward"----
+## ----direct_visual_awkward, fig.cap="A. Bar labels + axis label preserves information but is awkward"----
 library(tidyverse)
 
 tidytitanic::passengers %>% 
@@ -59,7 +64,7 @@ tidytitanic::passengers %>%
   geom_bar()
 
 
-## ---- fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"----
+## ----direct_visual_loss, fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"----
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = age) + 
@@ -67,64 +72,88 @@ ggplot() +
   facet_grid(~ survived)
 
 
-## ----statusquo, eval = T, message=F, warning=F--------------------------------
+## ----manipulation_status_quo_reprise, eval = T, message=F, warning=F----------
 library(tidyverse)
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ifelse(ind_graduated, 
-                                 "graduated", 
-                                 "not graduated")) |>
-  mutate(cat_graduated = fct_rev(cat_graduated))  
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE))  %>% 
+  mutate(cat_graduated  = 
+           ifelse(ind_graduated, 
+                  "graduated", 
+                  "not graduated"))  %>% 
+  mutate(cat_graduated = 
+           fct_rev(cat_graduated)
+         )  
 
 
-## ----proposed, eval = T, message=F, warning=F---------------------------------
+## ----manipulation_ind2cat, eval = T, message=F, warning=F---------------------
 library(ind2cat)
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE)) %>% 
+  mutate(cat_graduated  = 
+           ind_recode(ind_graduated)
+         )
 
 
-## ----proposed_customized------------------------------------------------------
+## ----manipulation_ind2cat_custom----------------------------------------------
 data.frame(ind_graduated = c(T,T,F)) %>% 
   mutate(cat_graduated  = ind_recode(ind_graduated, 
                                      cat_false = "current"))
 
 
-## -----------------------------------------------------------------------------
+## ----manipulation_custom_cat_true---------------------------------------------
 
 tibble(ind_grad = c("y", "n")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, 
                                 cat_true = "graduated"))
+
+
+## ----manipulation_custom_negator----------------------------------------------
+
 tibble(ind_grad = c(T,T,F)) %>%
   mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
 
+
+## ----manipulation_custom_false_cat--------------------------------------------
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
 
+
+## ----manipulation_custom_rev--------------------------------------------------
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
 
+
+## ----manipulation_custom_prefix-----------------------------------------------
 tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
   mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
 
 
 
-## -----------------------------------------------------------------------------
+## ----visual_ind2cat_improves--------------------------------------------------
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = ind_recode(survived)) + 
   geom_bar()
 
+
+## ----visual_ind2cat_improves_cat_false----------------------------------------
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
 
-  
+
+## ----visual_ind2cat_improves_cat_false_rev------------------------------------
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
   labs(x = NULL)
+
+
+
+## ----visual_ind2cat_preserves-------------------------------------------------
 
 tidytitanic::passengers %>% 
 ggplot() + 
@@ -132,13 +161,14 @@ ggplot() +
   geom_bar() + 
   facet_grid(~ ind_recode(survived))
 
+
+## ----table_ind2cat_preserves--------------------------------------------------
 tidytitanic::passengers %>%
   mutate(cat_survived = ind_recode(survived)) %>% 
   janitor::tabyl(sex, cat_survived) %>% 
   janitor::adorn_percentages() %>% 
   janitor::adorn_pct_formatting() %>% 
   janitor::adorn_ns(position = "rear")
-
 
 
 ## -----------------------------------------------------------------------------

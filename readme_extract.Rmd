@@ -1,26 +1,33 @@
 # Introduction
 
-Using current analytic tools analysts make a choice between directly using indicators or verbose recode.  Current proceedures for recoding indicator variables to a categorial variable is repetitive, but forgoing a recode and using indicator variables directly yeilds hard-to-interpret summary products. 
+Using current analytic tools analysts make a choice between directly using indicators or verbose recode.  Current procedures for recoding indicator variables to a categorical variable is repetitive, but forgoing a recode and using indicator variables directly yields hard-to-interpret summary products. 
 
 Below is demonstrated how an analyst might current recode and indicator variable; this method is repetitive: 
 
-```{r}
+```{r manipulation_status_quo}
 library(tidyverse)
 tidytitanic::passengers %>% 
   tibble() %>% 
-  mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
+  mutate(cat_survived = ifelse(survived, 
+                               "survived", 
+                               "not survived"), 
          .before = 1)
+```
 
+
+```{r visual_status_quo}
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived")) 
+  facet_grid(~ ifelse(survived, 
+                      "survived", 
+                      "not survived")) 
 ```
 
 This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistency in reporting.
 
-```{r}
+```{r visual_status_quo_order}
 data.frame(ind_daytime = c(T, F, T, T)) %>% 
     mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
   mutate(cat_survived = fct_rev(cat_survived)) %>% 
@@ -35,22 +42,21 @@ However, when indicator variables are used directly in data summary products lik
 
 Below, the column header comes from the indicator variable name allowing savvy readers to interpret the output, but interpretation is awkward:
 
-```{r}
+```{r direct_table_awkward}
 tidytitanic::passengers %>% 
   count(survived) 
 ```
 
 In the following two-way table, information is completely lost due to using the indicator variable directly:
 
-```{r}
+```{r direct_table_loss}
 tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived) %>% 
-  knitr::kable(caption = "C. ", format = kabel_format)
+  janitor::tabyl(sex, survived)
 ```
 
 In the following visual summary of the data, where the indicator variable is directly used, interpretation is awkward.
 
-```{r cars, fig.cap="A. Bar labels + axis label preserves information but is awkward"}
+```{r direct_visual_awkward, fig.cap="A. Bar labels + axis label preserves information but is awkward"}
 library(tidyverse)
 
 tidytitanic::passengers %>% 
@@ -59,10 +65,10 @@ tidytitanic::passengers %>%
   geom_bar()
 ```
 
-If used as a faceting variable with the ggplot2 library, information is lost and the graph is not directly interpable. 
+If used as a faceting variable with the ggplot2 library, information is lost and the graph is not directly interpretable. 
 
 
-```{r, fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"}
+```{r direct_visual_loss, fig.cap = "D. Facetting directly on an indicator variable with popular ggplot2 results in information loss"}
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = age) + 
@@ -80,38 +86,41 @@ The ind2cat::ind_recode() function uses variable name to automatically derive hu
 
 To clearly compare the new method, we reiterate the status quo with a toy example:
 
-```{r statusquo, eval = T, message=F, warning=F}
+```{r manipulation_status_quo_reprise, eval = T, message=F, warning=F}
 library(tidyverse)
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ifelse(ind_graduated, 
-                                 "graduated", 
-                                 "not graduated")) |>
-  mutate(cat_graduated = fct_rev(cat_graduated))  
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE))  %>% 
+  mutate(cat_graduated  = 
+           ifelse(ind_graduated, 
+                  "graduated", 
+                  "not graduated"))  %>% 
+  mutate(cat_graduated = 
+           fct_rev(cat_graduated)
+         )  
 ```
 
 Below we contrast this with the use of ind2cat's ind_recode function which avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
 
-```{r proposed, eval = T, message=F, warning=F}
+```{r manipulation_ind2cat, eval = T, message=F, warning=F}
 library(ind2cat)
 
-data.frame(ind_graduated = c(T,T,F)) |>
-  mutate(cat_graduated  = ind_recode(ind_graduated))
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE)) %>% 
+  mutate(cat_graduated  = 
+           ind_recode(ind_graduated)
+         )
 ```
 
 The indicator variable can be populated with TRUE/FALSE values as well as 1/0 or "Yes"/"No" (and variants 'y/n' for example).
-
 
 Furthermore, while ind_recode default functionality allows analysts to move from its first-cut human-readable recode, it also allows fully customized categories via adjustment of the functions parameters.
 
 - cat_true a character string string to be used place of  T/1/"Yes" for the categorical variable output, if NULL the category is automatically generated from the variable name
 
-
 - negator a character string used to create cat_false when cat_false is NULL, default is 'not'
 
-
 - cat_false a character string string to be used place of  F/0/"No" for the categorical variable output, if NULL the category is automatically generated from cat_true and the negator
-
 
 - rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE
 
@@ -119,7 +128,7 @@ Furthermore, while ind_recode default functionality allows analysts to move from
 
 
 
-```{r proposed_customized}
+```{r manipulation_ind2cat_custom}
 data.frame(ind_graduated = c(T,T,F)) %>% 
   mutate(cat_graduated  = ind_recode(ind_graduated, 
                                      cat_false = "current"))
@@ -127,21 +136,31 @@ data.frame(ind_graduated = c(T,T,F)) %>%
 
 
 
-```{r}
+```{r manipulation_custom_cat_true}
 
 tibble(ind_grad = c("y", "n")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, 
                                 cat_true = "graduated"))
+```
+
+```{r manipulation_custom_negator}
+
 tibble(ind_grad = c(T,T,F)) %>%
   mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
+```
 
+```{r manipulation_custom_false_cat}
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
+```
 
+```{r manipulation_custom_rev}
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
+```
 
+```{r manipulation_custom_prefix}
 tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
   mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
 
@@ -151,36 +170,48 @@ tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
 
 In what follows, we show ind2cat's use in summary products, which is a main motivation for ind2cat.
 
-```{r}
+```{r visual_ind2cat_improves}
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = ind_recode(survived)) + 
   geom_bar()
+```
 
+```{r visual_ind2cat_improves_cat_false}
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
+```
 
-  
+```{r visual_ind2cat_improves_cat_false_rev}
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
   labs(x = NULL)
+
+```
+
+```{r visual_ind2cat_preserves}
 
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
   facet_grid(~ ind_recode(survived))
+```
 
+```{r table_ind2cat_preserves}
 tidytitanic::passengers %>%
   mutate(cat_survived = ind_recode(survived)) %>% 
   janitor::tabyl(sex, cat_survived) %>% 
   janitor::adorn_percentages() %>% 
   janitor::adorn_pct_formatting() %>% 
   janitor::adorn_ns(position = "rear")
-
 ```
+
+
+# Conclusion
+
 
 
 # Implementation details

@@ -7,13 +7,12 @@
 
 # Abstract
 
-Indicator variables are often used in data analyses given the ease which
-with they are created, stored and interpreted
+Indicator variables are easy to create, store, and interpret
 \[@10.1177/1536867X19830921\]. They concisely encode information about
 the presence or not of a condition for observational units. The variable
-name encapsulates the information about the true condition, the
-variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”), indicate if
-the condition is true for the observational unit. When using indicator
+name encapsulates the information about the condition of interest, and
+the variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”) indicate
+if the condition is met for the observational unit. When using indicator
 variables to use in summary products, analysts often make a choice
 between using an indicator variable as-is or crafting categorical
 variables where values can be directly interpreted. Using the indicator
@@ -28,7 +27,7 @@ light weight syntax.
 
 # Issues up front
 
-## confessions
+## disclosures
 
 0)  ind2cat is experimental
 1)  I’m not sure if there there is already a solution
@@ -208,11 +207,15 @@ toy example:
 ``` r
 library(tidyverse)
 
-data.frame(ind_graduated = c(TRUE, TRUE, FALSE))  %>% 
-  mutate(cat_graduated  = ifelse(ind_graduated, 
-                                 "graduated", 
-                                 "not graduated"))  %>% 
-  mutate(cat_graduated = fct_rev(cat_graduated))  
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE))  %>% 
+  mutate(cat_graduated  = 
+           ifelse(ind_graduated, 
+                  "graduated", 
+                  "not graduated"))  %>% 
+  mutate(cat_graduated = 
+           fct_rev(cat_graduated)
+         )  
 #>   ind_graduated cat_graduated
 #> 1          TRUE     graduated
 #> 2          TRUE     graduated
@@ -227,8 +230,11 @@ the same task shown above more succinctly:
 ``` r
 library(ind2cat)
 
-data.frame(ind_graduated = c(T,T,F)) %>% 
-  mutate(cat_graduated  = ind_recode(ind_graduated))
+data.frame(ind_graduated = 
+             c(TRUE, TRUE, FALSE)) %>% 
+  mutate(cat_graduated  = 
+           ind_recode(ind_graduated)
+         )
 #>   ind_graduated cat_graduated
 #> 1          TRUE     graduated
 #> 2          TRUE     graduated
