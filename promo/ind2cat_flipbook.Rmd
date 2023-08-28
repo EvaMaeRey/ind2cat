@@ -1,0 +1,142 @@
+---
+title: "introducing {{ind2cat}}"
+subtitle: "Easily recode indicator variables to categories"
+author: "Gina Reynolds"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: [default, hygge, ninjutsu]
+    nature:
+      ratio: 16:9
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+
+```{r, include = F}
+# This is the recommended set up for flipbooks
+# you might think about setting cache to TRUE as you gain practice --- building flipbooks from scratch can be time consuming
+knitr::opts_chunk$set(fig.width = 6, message = FALSE, warning = FALSE, comment = "", cache = T)
+library(flipbookr)
+library(tidyverse)
+```
+
+
+```{r, child="../README.Rmd", include=F}
+
+```
+
+```{r}
+ggplot2::theme_set(new = theme_gray(base_size = 25))
+
+```
+
+
+<!-- get a flipbook version of the my_cars code chunk - pauses are where parentheses are balanced -->
+
+
+
+
+---
+class: inverse
+
+<br><br><br><br>
+
+# Indicator variables are easy to create, store and interpret.
+
+--
+
+# But direct use of indicator variables to create some data products yields bad results.
+
+---
+
+## Titanic example
+
+
+```{r example_data}
+library(tidytitanic)
+passengers %>% 
+  mutate(name = str_extract(name, ".{18}")) %>% 
+  head() 
+```
+
+
+
+---
+
+`r chunk_reveal("direct_table_awkward", break_type = 1, title = "## Awkward table output", widths = c(1,1))`
+
+---
+
+`r chunk_reveal("direct_visual_awkward", break_type = 1, title = "## Awkward visualization output", widths = c(1,1))`
+
+---
+
+`r chunk_reveal("direct_table_loss", break_type = 1, title = "## Info loss in table output", widths = c(1,1))`
+
+---
+
+`r chunk_reveal("direct_visual_loss", break_type = 1, title = "## Info loss in visual output", widths = c(1,1))`
+
+---
+class: inverse
+
+<br><br><br><br>
+
+
+# Recoding to a categorical variable yeilds better products.
+
+--
+
+# But is recoding is currently repetative.
+
+---
+
+`r chunk_reveal("manipulation_status_quo_reprise", title = "## Status quo pipeline", widths = c(1,1))`
+
+---
+
+
+# introducing ind2cat::ind_recode()
+
+---
+
+
+`r chunk_reveal("manipulation_ind2cat", title = "## Proposed ind2cat pipeline", widths = c(1,1))`
+
+
+---
+
+
+
+---
+
+
+
+
+
+<!-- adjust font size in this css code chunk, currently 80 -->
+
+```{css, eval = TRUE, echo = FALSE}
+.remark-code{line-height: 1.5; font-size: 130%}
+
+@media print {
+  .has-continuation {
+    display: block;
+  }
+}
+
+code.r.hljs.remark-code{
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+code.r.hljs.remark-code:hover{
+  overflow-x:visible;
+  width: 500px;
+  border-style: solid;
+}
+```
+

@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>introducing {{ind2cat}}</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Gina Reynolds" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/hygge.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/ninjutsu.css" rel="stylesheet" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# introducing {{ind2cat}}
+]
+.subtitle[
+## Easily recode indicator variables to categories
+]
+.author[
+### Gina Reynolds
+]
+
+---
+
+
+
+
+
+
+
+
+
+
+
+&lt;!-- README.md is generated from README.Rmd. Please edit that file --&gt;
+
+
+
+&lt;!-- badges: start --&gt;
+&lt;!-- badges: end --&gt;
+
+# Abstract
+
+Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted [@10.1177/1536867X19830921].  They concisely encode information about the presence or not of a condition for observational units.  The variable name encapsulates the information about the true condition, the variable's values (TRUE and FALSE, 1 or 0, "Yes" or "No"), indicate if the condition is true for the observational unit.  When using indicator variables to use in summary products, analysts often make a choice between using an indicator variable as-is or crafting categorical variables where values can be directly interpreted.  Using the indicator variable as-is may be motivated by time savings, but yields poor results in summary products.  {{ind2cat}} can help analysts concisely translate indicator variables to categorical variables for reporting products, yielding more polished outputs.  By default, ind2cat creates the categorical variable from the indicator variable name, resulting in a light weight syntax.
+
+&lt;!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ --&gt;
+
+
+# Issues up front
+
+## confessions
+
+0) ind2cat is experimental
+1) I'm not sure if there there is already a solution
+2) unsure if there are fundamental problems with this approach
+
+## to do to move ind2cat out of proof of concept phase
+
+- change to Rlang for grabbing function name (Claus Wilke)
+- left join instead of ifelse to make code more performant (Emily Rederer)
+- make "Y" "N" a lot stricter - right now we're assuming a ton!  Danger.
+
+
+# Introduction
+
+Using current analytic tools analysts make a choice between directly using indicators or verbose recode.  Current procedures for recoding indicator variables to a categorical variable is repetitive, but forgoing a recode and using indicator variables directly yields hard-to-interpret summary products. 
+
+Below is demonstrated how an analyst might current recode and indicator variable; this method is repetitive: 
+
+
+
+
+
+
+This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistency in reporting.
+
+
+
+Given how verbose recoding can be, analyst may choose to forego a recoding the variable, especially in exploratory analysis.
+
+However, when indicator variables are used directly in data summary products like tables and visuals, information is often awkwardly displayed and is sometimes lost. 
+
+Below, the column header comes from the indicator variable name allowing savvy readers to interpret the output, but interpretation is awkward:
+
+
+
+In the following two-way table, information is completely lost due to using the indicator variable directly:
+
+
+
+In the following visual summary of the data, where the indicator variable is directly used, interpretation is awkward.
+
+
+
+If used as a faceting variable with the ggplot2 library, information is lost and the graph is not directly interpretable. 
+
+
+
+
+
+
+# Introducing ind2cat::ind_recode  
+
+The ind2cat::ind_recode() function uses variable name to automatically derive human-readable, and appropriately ordered categories.
+  
+&lt;!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. --&gt;
+
+To clearly compare the new method, we reiterate the status quo with a toy example:
+
+
+
+Below we contrast this with the use of ind2cat's ind_recode function which avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:
+
+
+
+The indicator variable can be populated with TRUE/FALSE values as well as 1/0 or "Yes"/"No" (and variants 'y/n' for example).
+
+Furthermore, while ind_recode default functionality allows analysts to move from its first-cut human-readable recode, it also allows fully customized categories via adjustment of the functions parameters.
+
+- cat_true a character string string to be used place of  T/1/"Yes" for the categorical variable output, if NULL the category is automatically generated from the variable name
+
+- negator a character string used to create cat_false when cat_false is NULL, default is 'not'
+
+- cat_false a character string string to be used place of  F/0/"No" for the categorical variable output, if NULL the category is automatically generated from cat_true and the negator
+
+- rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE
+
+- var_prefix a character string that will be ignored when creating the categorical variable
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Use in data products like figures and tables
+
+In what follows, we show ind2cat's use in summary products, which is a main motivation for ind2cat.
+
+
+
+
+
+
+
+
+
+
+
+
+# Conclusion
+
+
+
+# Implementation details
+
+
+
+
+
+
+
+
+
+
+```r
+ggplot2::theme_set(new = theme_gray(base_size = 25))
+```
+
+
+&lt;!-- get a flipbook version of the my_cars code chunk - pauses are where parentheses are balanced --&gt;
+
+
+
+
+---
+class: inverse
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+# Indicator variables are easy to create, store and interpret.
+
+--
+
+# But direct use of indicator variables to create some data products yields bad results.
+
+---
+
+## Titanic example
+
+
+
+```r
+library(tidytitanic)
+passengers %&gt;% 
+  mutate(name = str_extract(name, ".{18}")) %&gt;% 
+  head() 
+```
+
+```
+                name class   age    sex survived
+1 Allen, Miss Elisab   1st 29.00 female        1
+2 Allison, Miss Hele   1st  2.00 female        0
+3 Allison, Mr Hudson   1st 30.00   male        0
+4 Allison, Mrs Hudso   1st 25.00 female        0
+5 Allison, Master Hu   1st  0.92   male        1
+6 Anderson, Mr Harry   1st 47.00   male        1
+```
+
+
+
+---
+
+count: false
+ 
+## Awkward table output
+.panel1-direct_table_awkward-1[
+
+```r
+tidytitanic::passengers %&gt;%
+  count(survived)
+```
+]
+ 
+.panel2-direct_table_awkward-1[
+
+```
+  survived   n
+1        0 863
+2        1 450
+```
+]
+
+&lt;style&gt;
+.panel1-direct_table_awkward-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-direct_table_awkward-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-direct_table_awkward-1 {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+---
+
+count: false
+ 
+## Awkward visualization output
+.panel1-direct_visual_awkward-1[
+
+```r
+library(tidyverse)
+
+tidytitanic::passengers %&gt;%
+  ggplot() +
+  aes(x = survived) +
+  geom_bar()
+```
+]
+ 
+.panel2-direct_visual_awkward-1[
+![](ind2cat_flipbook_files/figure-html/direct_visual_awkward_1_01_output-1.png)&lt;!-- --&gt;
+]
+
+&lt;style&gt;
+.panel1-direct_visual_awkward-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-direct_visual_awkward-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-direct_visual_awkward-1 {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+---
+
+count: false
+ 
+## Info loss in table output
+.panel1-direct_table_loss-1[
+
+```r
+tidytitanic::passengers %&gt;%
+  janitor::tabyl(sex, survived)
+```
+]
+ 
+.panel2-direct_table_loss-1[
+
+```
+    sex   0   1
+ female 154 308
+   male 709 142
+```
+]
+
+&lt;style&gt;
+.panel1-direct_table_loss-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-direct_table_loss-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-direct_table_loss-1 {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+---
+
+count: false
+ 
+## Info loss in visual output
+.panel1-direct_visual_loss-1[
+
+```r
+tidytitanic::passengers %&gt;%
+ggplot() +
+  aes(x = age) +
+  geom_histogram() +
+  facet_grid(~ survived)
+```
+]
+ 
+.panel2-direct_visual_loss-1[
+![](ind2cat_flipbook_files/figure-html/direct_visual_loss_1_01_output-1.png)&lt;!-- --&gt;
+]
+
+&lt;style&gt;
+.panel1-direct_visual_loss-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-direct_visual_loss-1 {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-direct_visual_loss-1 {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+---
+class: inverse
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+
+# Recoding to a categorical variable yeilds better products.
+
+--
+
+# But is recoding is currently repetative.
+
+---
+
+count: false
+ 
+## Status quo pipeline
+.panel1-manipulation_status_quo_reprise-auto[
+
+```r
+*library(tidyverse)
+```
+]
+ 
+.panel2-manipulation_status_quo_reprise-auto[
+
+]
+
+---
+count: false
+ 
+## Status quo pipeline
+.panel1-manipulation_status_quo_reprise-auto[
+
+```r
+library(tidyverse)
+
+*data.frame(ind_graduated =
+*            c(TRUE, TRUE, FALSE))
+```
+]
+ 
+.panel2-manipulation_status_quo_reprise-auto[
+
+```
+  ind_graduated
+1          TRUE
+2          TRUE
+3         FALSE
+```
+]
+
+---
+count: false
+ 
+## Status quo pipeline
+.panel1-manipulation_status_quo_reprise-auto[
+
+```r
+library(tidyverse)
+
+data.frame(ind_graduated =
+             c(TRUE, TRUE, FALSE))  %&gt;%
+* mutate(cat_graduated  =
+*          ifelse(ind_graduated,
+*                 "graduated",
+*                 "not graduated"))
+```
+]
+ 
+.panel2-manipulation_status_quo_reprise-auto[
+
+```
+  ind_graduated cat_graduated
+1          TRUE     graduated
+2          TRUE     graduated
+3         FALSE not graduated
+```
+]
+
+---
+count: false
+ 
+## Status quo pipeline
+.panel1-manipulation_status_quo_reprise-auto[
+
+```r
+library(tidyverse)
+
+data.frame(ind_graduated =
+             c(TRUE, TRUE, FALSE))  %&gt;%
+  mutate(cat_graduated  =
+           ifelse(ind_graduated,
+                  "graduated",
+                  "not graduated"))  %&gt;%
+* mutate(cat_graduated =
+*          fct_rev(cat_graduated)
+*        )
+```
+]
+ 
+.panel2-manipulation_status_quo_reprise-auto[
+
+```
+  ind_graduated cat_graduated
+1          TRUE     graduated
+2          TRUE     graduated
+3         FALSE not graduated
+```
+]
+
+&lt;style&gt;
+.panel1-manipulation_status_quo_reprise-auto {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-manipulation_status_quo_reprise-auto {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-manipulation_status_quo_reprise-auto {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+---
+
+
+# introducing ind2cat::ind_recode()
+
+---
+
+
+count: false
+ 
+## Proposed ind2cat pipeline
+.panel1-manipulation_ind2cat-auto[
+
+```r
+*library(ind2cat)
+```
+]
+ 
+.panel2-manipulation_ind2cat-auto[
+
+]
+
+---
+count: false
+ 
+## Proposed ind2cat pipeline
+.panel1-manipulation_ind2cat-auto[
+
+```r
+library(ind2cat)
+
+*data.frame(ind_graduated =
+*            c(TRUE, TRUE, FALSE))
+```
+]
+ 
+.panel2-manipulation_ind2cat-auto[
+
+```
+  ind_graduated
+1          TRUE
+2          TRUE
+3         FALSE
+```
+]
+
+---
+count: false
+ 
+## Proposed ind2cat pipeline
+.panel1-manipulation_ind2cat-auto[
+
+```r
+library(ind2cat)
+
+data.frame(ind_graduated =
+             c(TRUE, TRUE, FALSE)) %&gt;%
+* mutate(cat_graduated  =
+*          ind_recode(ind_graduated)
+*        )
+```
+]
+ 
+.panel2-manipulation_ind2cat-auto[
+
+```
+  ind_graduated cat_graduated
+1          TRUE     graduated
+2          TRUE     graduated
+3         FALSE not graduated
+```
+]
+
+&lt;style&gt;
+.panel1-manipulation_ind2cat-auto {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel2-manipulation_ind2cat-auto {
+  color: black;
+  width: 49%;
+  hight: 32%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+.panel3-manipulation_ind2cat-auto {
+  color: black;
+  width: NA%;
+  hight: 33%;
+  float: left;
+  padding-left: 1%;
+  font-size: 80%
+}
+&lt;/style&gt;
+
+
+
+
+---
+
+
+
+---
+
+
+
+
+
+&lt;!-- adjust font size in this css code chunk, currently 80 --&gt;
+
+&lt;style type="text/css"&gt;
+.remark-code{line-height: 1.5; font-size: 130%}
+
+@media print {
+  .has-continuation {
+    display: block;
+  }
+}
+
+code.r.hljs.remark-code{
+  position: relative;
+  overflow-x: hidden;
+}
+
+
+code.r.hljs.remark-code:hover{
+  overflow-x:visible;
+  width: 500px;
+  border-style: solid;
+}
+&lt;/style&gt;
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

@@ -21,6 +21,26 @@ bibliography: RJreferences.bib
 output: rticles::rjournal_article
 ---
 
+
+
+
+```{r, include=F}
+knitr::opts_chunk$set(message = F, 
+                      warning = F, 
+                      comment = "    ", 
+                      out.width = "69%")
+kabel_format <- "latex"
+
+
+library(magrittr)
+readLines("../../README.Rmd")  %>%  .[44:length(.)] %>% 
+  writeLines("../../readme_extract.Rmd")
+```
+
+```{r, child = "../../readme_extract.Rmd"}
+```
+
+
 <!-- ## Introduction -->
 
 <!-- Introductory section which may include references in parentheses -->
@@ -61,21 +81,3 @@ output: rticles::rjournal_article
 <!-- * Only the bib filename is to modifed. An example bib file is included in the -->
 <!-- template (`RJreferences.bib`) and you will have to name your bib file as the -->
 <!-- tex, R, and pdf files. -->
-
-
-```{r, include=F}
-knitr::opts_chunk$set(message = F, 
-                      warning = F, 
-                      comment = "    ", 
-                      out.width = "69%")
-kabel_format <- "latex"
-
-
-library(magrittr)
-readLines("../../README.Rmd")  %>%  .[44:length(.)] %>% 
-  writeLines("../../readme_extract.Rmd")
-```
-
-```{r, child = "../../readme_extract.Rmd"}
-```
-

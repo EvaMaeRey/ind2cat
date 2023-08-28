@@ -8,20 +8,21 @@
 # Abstract
 
 Indicator variables are often used in data analyses given the ease which
-with they are created, stored and interpreted. They concisely encode
-information about the presence or not of a condition for observational
-units. The variable name encapsulates the information about the true
-condition, the variable’s values (TRUE and FALSE, 1 or 0, “Yes” or
-“No”), indicate if the condition is true for the observational unit.
-When using indicator variables to use in summary products, analysts
-often make a choice between using an indicator variable as-is or
-crafting categorical variables where values can be directly interpreted.
-Using the indicator variable as-is may be motivated by time savings, but
-yeilds poor results in summary products. {{ind2cat}} can help analysts
-concisely translate indicator variables to categorical variables for
-reporting products, yielding more polished outputs. By default, ind2cat
-creates the categorical variable from the indicator variable name,
-resulting in a light weight syntax.
+with they are created, stored and interpreted
+\[@10.1177/1536867X19830921\]. They concisely encode information about
+the presence or not of a condition for observational units. The variable
+name encapsulates the information about the true condition, the
+variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”), indicate if
+the condition is true for the observational unit. When using indicator
+variables to use in summary products, analysts often make a choice
+between using an indicator variable as-is or crafting categorical
+variables where values can be directly interpreted. Using the indicator
+variable as-is may be motivated by time savings, but yields poor results
+in summary products. {{ind2cat}} can help analysts concisely translate
+indicator variables to categorical variables for reporting products,
+yielding more polished outputs. By default, ind2cat creates the
+categorical variable from the indicator variable name, resulting in a
+light weight syntax.
 
 <!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
 
@@ -29,7 +30,7 @@ resulting in a light weight syntax.
 
 ## confessions
 
-0)  ind2cat is experimental, proof of concept phase
+0)  ind2cat is experimental
 1)  I’m not sure if there there is already a solution
 2)  unsure if there are fundamental problems with this approach
 
@@ -44,10 +45,10 @@ resulting in a light weight syntax.
 # Introduction
 
 Using current analytic tools analysts make a choice between directly
-using indicators or verbose recode. Current proceedures for recoding
-indicator variables to a categorial variable is repetitive, but forgoing
-a recode and using indicator variables directly yeilds hard-to-interpret
-summary products.
+using indicators or verbose recode. Current procedures for recoding
+indicator variables to a categorical variable is repetitive, but
+forgoing a recode and using indicator variables directly yields
+hard-to-interpret summary products.
 
 Below is demonstrated how an analyst might current recode and indicator
 variable; this method is repetitive:
@@ -66,7 +67,9 @@ library(tidyverse)
 #> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
 tidytitanic::passengers %>% 
   tibble() %>% 
-  mutate(cat_survived = ifelse(survived, "survived", "not survived"), 
+  mutate(cat_survived = ifelse(survived, 
+                               "survived", 
+                               "not survived"), 
          .before = 1)
 #> # A tibble: 1,313 × 6
 #>    cat_survived name                                   class   age sex   survi…¹
@@ -82,15 +85,19 @@ tidytitanic::passengers %>%
 #>  9 survived     Appleton, Mrs Edward Dale (Charlotte … 1st   58    fema…       1
 #> 10 not survived Artagaveytia, Mr Ramon                 1st   71    male        0
 #> # … with 1,303 more rows, and abbreviated variable name ¹​survived
+```
 
+``` r
 tidytitanic::passengers %>% 
 ggplot() + 
   aes(x = sex) + 
   geom_bar() + 
-  facet_grid(~ ifelse(survived, "survived", "not survived")) 
+  facet_grid(~ ifelse(survived, 
+                      "survived", 
+                      "not survived")) 
 ```
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-visual_status_quo-1.png" width="100%" />
 
 This solution above also does not address category display ordering;
 ordering in products will be alphabetical and not reflect the F/T order
@@ -107,7 +114,7 @@ data.frame(ind_daytime = c(T, F, T, T)) %>%
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-visual_status_quo_order-1.png" width="100%" />
 
 Given how verbose recoding can be, analyst may choose to forego a
 recoding the variable, especially in exploratory analysis.
@@ -132,93 +139,11 @@ using the indicator variable directly:
 
 ``` r
 tidytitanic::passengers %>% 
-  janitor::tabyl(sex, survived) %>% 
-  knitr::kable(caption = "C. ", format = kabel_format)
+  janitor::tabyl(sex, survived)
+#>     sex   0   1
+#>  female 154 308
+#>    male 709 142
 ```
-
-<table>
-
-<caption>
-
-C.
-
-</caption>
-
-<thead>
-
-<tr>
-
-<th style="text-align:left;">
-
-sex
-
-</th>
-
-<th style="text-align:right;">
-
-0
-
-</th>
-
-<th style="text-align:right;">
-
-1
-
-</th>
-
-</tr>
-
-</thead>
-
-<tbody>
-
-<tr>
-
-<td style="text-align:left;">
-
-female
-
-</td>
-
-<td style="text-align:right;">
-
-154
-
-</td>
-
-<td style="text-align:right;">
-
-308
-
-</td>
-
-</tr>
-
-<tr>
-
-<td style="text-align:left;">
-
-male
-
-</td>
-
-<td style="text-align:right;">
-
-709
-
-</td>
-
-<td style="text-align:right;">
-
-142
-
-</td>
-
-</tr>
-
-</tbody>
-
-</table>
 
 In the following visual summary of the data, where the indicator
 variable is directly used, interpretation is awkward.
@@ -234,7 +159,7 @@ tidytitanic::passengers %>%
 
 <div class="figure">
 
-<img src="man/figures/README-cars-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
+<img src="man/figures/README-direct_visual_awkward-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
 
 <p class="caption">
 
@@ -245,7 +170,7 @@ A. Bar labels + axis label preserves information but is awkward
 </div>
 
 If used as a faceting variable with the ggplot2 library, information is
-lost and the graph is not directly interpable.
+lost and the graph is not directly interpretable.
 
 ``` r
 tidytitanic::passengers %>% 
@@ -259,7 +184,7 @@ ggplot() +
 
 <div class="figure">
 
-<img src="man/figures/README-unnamed-chunk-6-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
+<img src="man/figures/README-direct_visual_loss-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
 
 <p class="caption">
 
@@ -283,10 +208,10 @@ toy example:
 ``` r
 library(tidyverse)
 
-data.frame(ind_graduated = c(T,T,F)) |>
+data.frame(ind_graduated = c(TRUE, TRUE, FALSE))  %>% 
   mutate(cat_graduated  = ifelse(ind_graduated, 
                                  "graduated", 
-                                 "not graduated")) |>
+                                 "not graduated"))  %>% 
   mutate(cat_graduated = fct_rev(cat_graduated))  
 #>   ind_graduated cat_graduated
 #> 1          TRUE     graduated
@@ -302,7 +227,7 @@ the same task shown above more succinctly:
 ``` r
 library(ind2cat)
 
-data.frame(ind_graduated = c(T,T,F)) |>
+data.frame(ind_graduated = c(T,T,F)) %>% 
   mutate(cat_graduated  = ind_recode(ind_graduated))
 #>   ind_graduated cat_graduated
 #> 1          TRUE     graduated
@@ -356,6 +281,10 @@ tibble(ind_grad = c("y", "n")) %>%
 #>   <chr>    <fct>        
 #> 1 y        graduated    
 #> 2 n        not graduated
+```
+
+``` r
+
 tibble(ind_grad = c(T,T,F)) %>%
   mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
 #> # A tibble: 3 × 2
@@ -364,7 +293,9 @@ tibble(ind_grad = c(T,T,F)) %>%
 #> 1 TRUE     grad       
 #> 2 TRUE     grad       
 #> 3 FALSE    didn't grad
+```
 
+``` r
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
 #> # A tibble: 2 × 2
@@ -372,7 +303,9 @@ tibble(ind_grad = c("Y", "N")) %>%
 #>   <chr>    <fct>   
 #> 1 Y        grad    
 #> 2 N        enrolled
+```
 
+``` r
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
@@ -381,7 +314,9 @@ tibble(ind_grad = c("yes", "no")) %>%
 #>   <chr>    <fct>           <dbl>
 #> 1 yes      grad                1
 #> 2 no       not grad            2
+```
 
+``` r
 tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
   mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
 #> # A tibble: 7 × 2
@@ -408,27 +343,24 @@ ggplot() +
   geom_bar()
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-1.png" width="100%" />
+<img src="man/figures/README-visual_ind2cat_improves-1.png" width="100%" />
 
 ``` r
-
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "perished"))
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-2.png" width="100%" />
+<img src="man/figures/README-visual_ind2cat_improves_cat_false-1.png" width="100%" />
 
 ``` r
-
-  
 # or
 last_plot() +
   aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
   labs(x = NULL)
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-3.png" width="100%" />
+<img src="man/figures/README-visual_ind2cat_improves_cat_false_rev-1.png" width="100%" />
 
 ``` r
 
@@ -439,10 +371,9 @@ ggplot() +
   facet_grid(~ ind_recode(survived))
 ```
 
-<img src="man/figures/README-unnamed-chunk-8-4.png" width="100%" />
+<img src="man/figures/README-visual_ind2cat_preserves-1.png" width="100%" />
 
 ``` r
-
 tidytitanic::passengers %>%
   mutate(cat_survived = ind_recode(survived)) %>% 
   janitor::tabyl(sex, cat_survived) %>% 
@@ -453,6 +384,8 @@ tidytitanic::passengers %>%
 #>  female  33.3% (154) 66.7% (308)
 #>    male  83.3% (709) 16.7% (142)
 ```
+
+# Conclusion
 
 # Implementation details
 
