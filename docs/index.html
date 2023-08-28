@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="description" content="The package automatically creates categorical variables from indicator variabls, based on the indicator variable's name.">
-<title>Translate from an Indicator Variables to Categorical Variables • indicatorrecode</title>
+<title>Translate from an Indicator Variables to Categorical Variables • ind2cat</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
@@ -24,7 +24,7 @@
 
     <nav class="navbar fixed-top navbar-light navbar-expand-lg bg-light"><div class="container">
     
-    <a class="navbar-brand me-2" href="index.html">indicatorrecode</a>
+    <a class="navbar-brand me-2" href="index.html">ind2cat</a>
 
     <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
 
@@ -53,8 +53,36 @@
   <main id="main" class="col-md-9"><div class="section level1">
 <div class="page-header"><h1 id="abstract">Abstract<a class="anchor" aria-label="anchor" href="#abstract"></a>
 </h1></div>
-<!-- badges: start --><!-- badges: end --><p>{{ind2cat}} can help analysts translate from an indicator variables to categorical variables that can be used in reporting products. By default, the categorical variable is created from the indicator variable name, resulting in a light weight syntax.</p>
-<p>ind2cat’s ind_recode function saves time by automatically creating meaningful categories based on a variable name as shown below:</p>
+<p>Indicator variables are easy to create, store, and interpret [@10.1177/1536867X19830921]. They concisely encode information about the presence or not of a condition for observational units. The variable name encapsulates the information about the condition of interest, and the variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”) indicate if the condition is met for the observational unit. When using indicator variables to use in summary products, analysts often make a choice between using an indicator variable as-is or crafting categorical variables where values can be directly interpreted. Using the indicator variable as-is may be motivated by time savings, but yields poor results in summary products. {{ind2cat}} can help analysts concisely translate indicator variables to categorical variables for reporting products, yielding more polished outputs. By default, ind2cat creates the categorical variable from the indicator variable name, resulting in a light weight syntax.</p>
+<!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
+</div>
+<div class="section level1">
+<h1 id="issues-up-front">Issues up front<a class="anchor" aria-label="anchor" href="#issues-up-front"></a>
+</h1>
+<div class="section level2">
+<h2 id="disclosures">disclosures<a class="anchor" aria-label="anchor" href="#disclosures"></a>
+</h2>
+<ol start="0" style="list-style-type: decimal">
+<li>ind2cat is experimental</li>
+<li>I’m not sure if there there is already a solution</li>
+<li>unsure if there are fundamental problems with this approach</li>
+</ol>
+</div>
+<div class="section level2">
+<h2 id="to-do-to-move-ind2cat-out-of-proof-of-concept-phase">to do to move ind2cat out of proof of concept phase<a class="anchor" aria-label="anchor" href="#to-do-to-move-ind2cat-out-of-proof-of-concept-phase"></a>
+</h2>
+<ul>
+<li>change to Rlang for grabbing function name (Claus Wilke)</li>
+<li>left join instead of ifelse to make code more performant (Emily Rederer)</li>
+<li>make “Y” “N” a lot stricter - right now we’re assuming a ton! Danger.</li>
+</ul>
+</div>
+</div>
+<div class="section level1">
+<h1 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
+</h1>
+<p>Using current analytic tools analysts make a choice between directly using indicators or verbose recode. Current procedures for recoding indicator variables to a categorical variable is repetitive, but forgoing a recode and using indicator variables directly yields hard-to-interpret summary products.</p>
+<p>Below is demonstrated how an analyst might current recode and indicator variable; this method is repetitive:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──</span></span>
@@ -67,119 +95,11 @@
 <span><span class="co">#&gt; ✖ dplyr::filter() masks stats::filter()</span></span>
 <span><span class="co">#&gt; ✖ dplyr::lag()    masks stats::lag()</span></span>
 <span><span class="co">#&gt; ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">indicatorrecode</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_graduated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_graduated</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt;   ind_graduated cat_graduated</span></span>
-<span><span class="co">#&gt; 1          TRUE     graduated</span></span>
-<span><span class="co">#&gt; 2          TRUE     graduated</span></span>
-<span><span class="co">#&gt; 3         FALSE not graduated</span></span></code></pre></div>
-<p>This can replace the less succinct approach:</p>
-<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_graduated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated  <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">ind_graduated</span>, </span>
-<span>                                 <span class="st">"graduated"</span>, </span>
-<span>                                 <span class="st">"not graduated"</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_rev.html" class="external-link">fct_rev</a></span><span class="op">(</span><span class="va">cat_graduated</span><span class="op">)</span><span class="op">)</span>  </span>
-<span><span class="co">#&gt;   ind_graduated cat_graduated</span></span>
-<span><span class="co">#&gt; 1          TRUE     graduated</span></span>
-<span><span class="co">#&gt; 2          TRUE     graduated</span></span>
-<span><span class="co">#&gt; 3         FALSE not graduated</span></span></code></pre></div>
-</div>
-<div class="section level1">
-<h1 id="background-indicator-variables-a-common-and-well-understood-way-to-store-information">Background: <em>indicator variables a common and well understood way to store information.</em>
-<a class="anchor" aria-label="anchor" href="#background-indicator-variables-a-common-and-well-understood-way-to-store-information"></a>
-</h1>
-<p>Indicator variables are often used in data analyses given the ease which with they are created, stored and interpreted. They concisely encode information about the presence or not of a condition for observational units.</p>
-<p>see.. <a href="https://emilyriederer.netlify.app/post/column-name-contracts/" class="external-link uri">https://emilyriederer.netlify.app/post/column-name-contracts/</a></p>
-<p>In exploratory analyses indicator variables, analysts often make a choice between crafting an categorical variable whose values preserve the information that the indicator variable <em>name</em> holds, or using an indicator variable as-is; the later choice may be motivated by time savings.</p>
-</div>
-<div class="section level1">
-<h1 id="problem-direct-use-of-indicator-variables-in-data-products">Problem: Direct use of indicator variables in data products.<a class="anchor" aria-label="anchor" href="#problem-direct-use-of-indicator-variables-in-data-products"></a>
-</h1>
-<p>When indicator variables are not translated to a categorical analogue in creating data products like tables and visuals, information is often awkwardly displayed and is sometimes lost.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
-<span></span>
 <span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">survived</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<p><img src="reference/figures/README-cars-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%"></p>
-<p class="caption"></p>
-<p>A. Bar labels + axis label preserves information but is awkward</p>
-</div>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span>caption <span class="op">=</span> <span class="st">"B. Column header from variable name and 0-1 categories preserves information but is awkward"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="right">survived</th>
-<th align="right">n</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="right">0</td>
-<td align="right">863</td>
-</tr>
-<tr class="even">
-<td align="right">1</td>
-<td align="right">450</td>
-</tr>
-</tbody>
-</table>
-<p>B. Column header from variable name and 0-1 categories preserves information but is awkward</p>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html" class="external-link">tabyl</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">survived</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span>caption <span class="op">=</span> <span class="st">"C. Information loss with a two-way table for column variables"</span><span class="op">)</span></span></code></pre></div>
-<table class="table">
-<thead><tr class="header">
-<th align="left">sex</th>
-<th align="right">0</th>
-<th align="right">1</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">female</td>
-<td align="right">154</td>
-<td align="right">308</td>
-</tr>
-<tr class="even">
-<td align="left">male</td>
-<td align="right">709</td>
-<td align="right">142</td>
-</tr>
-</tbody>
-</table>
-<p>C. Information loss with a two-way table for column variables</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="va">survived</span><span class="op">)</span></span></code></pre></div>
-<div class="figure">
-<p><img src="reference/figures/README-cars-2.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%"></p>
-<p class="caption"></p>
-<p>D. Facetting directly on an indicator variable with popular ggplot2 results in information loss</p>
-</div>
-</div>
-<div class="section level1">
-<h1 id="one-off-solution-manual-indicator-recode-but-is-repetitive">One-off solution: <em>manual indicator recode, but is repetitive</em>
-<a class="anchor" aria-label="anchor" href="#one-off-solution-manual-indicator-recode-but-is-repetitive"></a>
-</h1>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_survived <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">survived</span>, <span class="st">"survived"</span>, <span class="st">"not survived"</span><span class="op">)</span>, </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_survived <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">survived</span>, </span>
+<span>                               <span class="st">"survived"</span>, </span>
+<span>                               <span class="st">"not survived"</span><span class="op">)</span>, </span>
 <span>         .before <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span>
 <span><span class="co">#&gt; # A tibble: 1,313 × 6</span></span>
 <span><span class="co">#&gt;    cat_survived name                                   class   age sex   survi…¹</span></span>
@@ -194,29 +114,219 @@
 <span><span class="co">#&gt;  8 not survived Andrews, Mr Thomas, jr                 1st   39    male        0</span></span>
 <span><span class="co">#&gt;  9 survived     Appleton, Mrs Edward Dale (Charlotte … 1st   58    fema…       1</span></span>
 <span><span class="co">#&gt; 10 not survived Artagaveytia, Mr Ramon                 1st   71    male        0</span></span>
-<span><span class="co">#&gt; # … with 1,303 more rows, and abbreviated variable name ¹​survived</span></span>
-<span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span><span class="co">#&gt; # … with 1,303 more rows, and abbreviated variable name ¹​survived</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">survived</span>, <span class="st">"survived"</span>, <span class="st">"not survived"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-4-1.png" width="100%"></p>
-<p>This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable. An additional step to reflect the source variable, using a function like fct_rev, may be required for consistency in reporting.</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">survived</span>, </span>
+<span>                      <span class="st">"survived"</span>, </span>
+<span>                      <span class="st">"not survived"</span><span class="op">)</span><span class="op">)</span> </span></code></pre></div>
+<p><img src="reference/figures/README-visual_status_quo-1.png" width="100%"></p>
+<p>This solution above also does not address category display ordering; ordering in products will be alphabetical and not reflect the F/T order of the source variable. An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistency in reporting.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_daytime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>, <span class="cn">F</span>, <span class="cn">T</span>, <span class="cn">T</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_survived <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">ind_daytime</span>, <span class="st">"daytime"</span>, <span class="st">"not daytime"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_survived <span class="op">=</span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_rev.html" class="external-link">fct_rev</a></span><span class="op">(</span><span class="va">cat_survived</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">cat_survived</span><span class="op">)</span> <span class="op">+</span> </span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-5-1.png" width="100%"></p>
+<p><img src="reference/figures/README-visual_status_quo_order-1.png" width="100%"></p>
+<p>Given how verbose recoding can be, analyst may choose to forego a recoding the variable, especially in exploratory analysis.</p>
+<p>However, when indicator variables are used directly in data summary products like tables and visuals, information is often awkwardly displayed and is sometimes lost.</p>
+<p>Below, the column header comes from the indicator variable name allowing savvy readers to interpret the output, but interpretation is awkward:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/count.html" class="external-link">count</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span> </span>
+<span><span class="co">#&gt;   survived   n</span></span>
+<span><span class="co">#&gt; 1        0 863</span></span>
+<span><span class="co">#&gt; 2        1 450</span></span></code></pre></div>
+<p>In the following two-way table, information is completely lost due to using the indicator variable directly:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html" class="external-link">tabyl</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">survived</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     sex   0   1</span></span>
+<span><span class="co">#&gt;  female 154 308</span></span>
+<span><span class="co">#&gt;    male 709 142</span></span></code></pre></div>
+<p>In the following visual summary of the data, where the indicator variable is directly used, interpretation is awkward.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">survived</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<div class="figure">
+<p><img src="reference/figures/README-direct_visual_awkward-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%"></p>
+<p class="caption"></p>
+<p>A. Bar labels + axis label preserves information but is awkward</p>
+</div>
+<p>If used as a faceting variable with the ggplot2 library, information is lost and the graph is not directly interpretable.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">age</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_histogram.html" class="external-link">geom_histogram</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="va">survived</span><span class="op">)</span></span>
+<span><span class="co">#&gt; `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</span></span>
+<span><span class="co">#&gt; Warning: Removed 557 rows containing non-finite values (`stat_bin()`).</span></span></code></pre></div>
+<div class="figure">
+<p><img src="reference/figures/README-direct_visual_loss-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%"></p>
+<p class="caption"></p>
+<p>D. Facetting directly on an indicator variable with popular ggplot2 results in information loss</p>
+</div>
 </div>
 <div class="section level1">
-<h1 id="introducing-ind_recode-ind_recode-function-uses-variable-name-as-starting-point-for-human-readable-categories">Introducing ind_recode <em>ind_recode() function uses variable name as starting point for human-readable categories</em>
-<a class="anchor" aria-label="anchor" href="#introducing-ind_recode-ind_recode-function-uses-variable-name-as-starting-point-for-human-readable-categories"></a>
+<h1 id="introducing-ind2catind_recode">Introducing ind2cat::ind_recode<a class="anchor" aria-label="anchor" href="#introducing-ind2catind_recode"></a>
 </h1>
-<!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. --><div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<p>The ind2cat::ind_recode() function uses variable name to automatically derive human-readable, and appropriately ordered categories.</p>
+<!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. --><p>To clearly compare the new method, we reiterate the status quo with a toy example:</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tidyverse.tidyverse.org" class="external-link">tidyverse</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_graduated <span class="op">=</span> </span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span>  <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated  <span class="op">=</span> </span>
+<span>           <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">ind_graduated</span>, </span>
+<span>                  <span class="st">"graduated"</span>, </span>
+<span>                  <span class="st">"not graduated"</span><span class="op">)</span><span class="op">)</span>  <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated <span class="op">=</span> </span>
+<span>           <span class="fu"><a href="https://forcats.tidyverse.org/reference/fct_rev.html" class="external-link">fct_rev</a></span><span class="op">(</span><span class="va">cat_graduated</span><span class="op">)</span></span>
+<span>         <span class="op">)</span>  </span>
+<span><span class="co">#&gt;   ind_graduated cat_graduated</span></span>
+<span><span class="co">#&gt; 1          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 2          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 3         FALSE not graduated</span></span></code></pre></div>
+<p>Below we contrast this with the use of ind2cat’s ind_recode function which avoids repetition by creating categories based on the indicator variable name. Using the the function ind_recode(), we can accomplish the same task shown above more succinctly:</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">ind2cat</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_graduated <span class="op">=</span> </span>
+<span>             <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">TRUE</span>, <span class="cn">TRUE</span>, <span class="cn">FALSE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated  <span class="op">=</span> </span>
+<span>           <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_graduated</span><span class="op">)</span></span>
+<span>         <span class="op">)</span></span>
+<span><span class="co">#&gt;   ind_graduated cat_graduated</span></span>
+<span><span class="co">#&gt; 1          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 2          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 3         FALSE not graduated</span></span></code></pre></div>
+<p>The indicator variable can be populated with TRUE/FALSE values as well as 1/0 or “Yes”/“No” (and variants ‘y/n’ for example).</p>
+<p>Furthermore, while ind_recode default functionality allows analysts to move from its first-cut human-readable recode, it also allows fully customized categories via adjustment of the functions parameters.</p>
+<ul>
+<li><p>cat_true a character string string to be used place of T/1/“Yes” for the categorical variable output, if NULL the category is automatically generated from the variable name</p></li>
+<li><p>negator a character string used to create cat_false when cat_false is NULL, default is ‘not’</p></li>
+<li><p>cat_false a character string string to be used place of F/0/“No” for the categorical variable output, if NULL the category is automatically generated from cat_true and the negator</p></li>
+<li><p>rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE</p></li>
+<li><p>var_prefix a character string that will be ignored when creating the categorical variable</p></li>
+</ul>
+<!-- end list --><div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ind_graduated <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_graduated  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_graduated</span>, </span>
+<span>                                     cat_false <span class="op">=</span> <span class="st">"current"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt;   ind_graduated cat_graduated</span></span>
+<span><span class="co">#&gt; 1          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 2          TRUE     graduated</span></span>
+<span><span class="co">#&gt; 3         FALSE       current</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"n"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, </span>
+<span>                                cat_true <span class="op">=</span> <span class="st">"graduated"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;   ind_grad cat_grad     </span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;        </span></span>
+<span><span class="co">#&gt; 1 y        graduated    </span></span>
+<span><span class="co">#&gt; 2 n        not graduated</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, negator <span class="op">=</span> <span class="st">"didn't"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 2</span></span>
+<span><span class="co">#&gt;   ind_grad cat_grad   </span></span>
+<span><span class="co">#&gt;   &lt;lgl&gt;    &lt;fct&gt;      </span></span>
+<span><span class="co">#&gt; 1 TRUE     grad       </span></span>
+<span><span class="co">#&gt; 2 TRUE     grad       </span></span>
+<span><span class="co">#&gt; 3 FALSE    didn't grad</span></span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, cat_false <span class="op">=</span> <span class="st">"enrolled"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;   </span></span>
+<span><span class="co">#&gt; 1 Y        grad    </span></span>
+<span><span class="co">#&gt; 2 N        enrolled</span></span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, rev <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad_num <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">cat_grad</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 3</span></span>
+<span><span class="co">#&gt;   ind_grad cat_grad cat_grad_num</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;           &lt;dbl&gt;</span></span>
+<span><span class="co">#&gt; 1 yes      grad                1</span></span>
+<span><span class="co">#&gt; 2 no       not grad            2</span></span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>dummy_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span> ,<span class="fl">0</span> ,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">dummy_grad</span>, var_prefix <span class="op">=</span> <span class="st">"dummy_"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 7 × 2</span></span>
+<span><span class="co">#&gt;   dummy_grad cat_grad</span></span>
+<span><span class="co">#&gt;        &lt;dbl&gt; &lt;fct&gt;   </span></span>
+<span><span class="co">#&gt; 1          0 not grad</span></span>
+<span><span class="co">#&gt; 2          0 not grad</span></span>
+<span><span class="co">#&gt; 3          1 grad    </span></span>
+<span><span class="co">#&gt; 4          1 grad    </span></span>
+<span><span class="co">#&gt; 5          1 grad    </span></span>
+<span><span class="co">#&gt; 6          0 not grad</span></span>
+<span><span class="co">#&gt; 7          0 not grad</span></span></code></pre></div>
+<div class="section level2">
+<h2 id="use-in-data-products-like-figures-and-tables">Use in data products like figures and tables<a class="anchor" aria-label="anchor" href="#use-in-data-products-like-figures-and-tables"></a>
+</h2>
+<p>In what follows, we show ind2cat’s use in summary products, which is a main motivation for ind2cat.</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-visual_ind2cat_improves-1.png" width="100%"></p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># or</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/last_plot.html" class="external-link">last_plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span>, cat_false <span class="op">=</span> <span class="st">"perished"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-visual_ind2cat_improves_cat_false-1.png" width="100%"></p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># or</span></span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/last_plot.html" class="external-link">last_plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span>, cat_false <span class="op">=</span> <span class="st">"didn't"</span>, rev <span class="op">=</span> <span class="cn">T</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-visual_ind2cat_improves_cat_false_rev-1.png" width="100%"></p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span></span>
+<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="reference/figures/README-visual_ind2cat_preserves-1.png" width="100%"></p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_survived <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/tabyl.html" class="external-link">tabyl</a></span><span class="op">(</span><span class="va">sex</span>, <span class="va">cat_survived</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_percentages.html" class="external-link">adorn_percentages</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_pct_formatting.html" class="external-link">adorn_pct_formatting</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
+<span>  <span class="fu">janitor</span><span class="fu">::</span><span class="fu"><a href="https://sfirke.github.io/janitor/reference/adorn_ns.html" class="external-link">adorn_ns</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"rear"</span><span class="op">)</span></span>
+<span><span class="co">#&gt;     sex not survived    survived</span></span>
+<span><span class="co">#&gt;  female  33.3% (154) 66.7% (308)</span></span>
+<span><span class="co">#&gt;    male  83.3% (709) 16.7% (142)</span></span></code></pre></div>
+</div>
+</div>
+<div class="section level1"><h1 id="conclusion">Conclusion<a class="anchor" aria-label="anchor" href="#conclusion"></a>
+</h1></div>
+<div class="section level1">
+<h1 id="implementation-details">Implementation details<a class="anchor" aria-label="anchor" href="#implementation-details"></a>
+</h1>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/readLines.html" class="external-link">readLines</a></span><span class="op">(</span><span class="st">"R/ind_recode.R"</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">implementation</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co">#' ind_recode</span></span>
 <span><span class="co">#'</span></span>
 <span><span class="co">#' @param var the name of an indicator variable</span></span>
@@ -280,252 +390,6 @@
 <span></span>
 <span><span class="op">}</span></span></code></pre></div>
 </div>
-<div class="section level1">
-<h1 id="to-do">to do<a class="anchor" aria-label="anchor" href="#to-do"></a>
-</h1>
-<ul>
-<li>change to Rlang for grabbing function name</li>
-<li>make “Y” “N” a lot stricter - right now we’re assuming a ton!</li>
-</ul>
-</div>
-<div class="section level1">
-<h1 id="basic-examples-how-to-use-ind_recode">Basic examples: <em>How to use ind_recode()</em>
-<a class="anchor" aria-label="anchor" href="#basic-examples-how-to-use-ind_recode"></a>
-</h1>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tibble.tidyverse.org/" class="external-link">tibble</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span> ,<span class="fl">0</span> ,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 7 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;      &lt;dbl&gt; &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1        0 not grad</span></span>
-<span><span class="co">#&gt; 2        0 not grad</span></span>
-<span><span class="co">#&gt; 3        1 grad    </span></span>
-<span><span class="co">#&gt; 4        1 grad    </span></span>
-<span><span class="co">#&gt; 5        1 grad    </span></span>
-<span><span class="co">#&gt; 6        0 not grad</span></span>
-<span><span class="co">#&gt; 7        0 not grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 3 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;   &lt;lgl&gt;    &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1 TRUE     grad    </span></span>
-<span><span class="co">#&gt; 2 TRUE     grad    </span></span>
-<span><span class="co">#&gt; 3 FALSE    not grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1 Y        grad    </span></span>
-<span><span class="co">#&gt; 2 N        not grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"n"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1 y        grad    </span></span>
-<span><span class="co">#&gt; 2 n        not grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1 yes      grad    </span></span>
-<span><span class="co">#&gt; 2 no       not grad</span></span></code></pre></div>
-</div>
-<div class="section level1">
-<h1 id="customizability">Customizability<a class="anchor" aria-label="anchor" href="#customizability"></a>
-</h1>
-<p>We believe that ind_recode is useful in quickly translating to a human understandable outcome.</p>
-<p>However, addition functionality allows analysts to fully specify their preferences about the categories outputted.</p>
-<ul>
-<li>var_prefix a character string that will be ignored when creating the categorical variable</li>
-<li>negator a character string used to create cat_false when cat_false is NULL, default is ‘not’</li>
-<li>cat_true a character string string to be used place of T/1/“Yes” for the categorical variable output, if NULL the category is automatically generated from the variable name</li>
-<li>cat_false a character string string to be used place of F/0/“No” for the categorical variable output, if NULL the category is automatically generated from cat_true and the negator</li>
-<li>rev logical indicating if the order should be reversed from the F/T ordering of the indicator source variable, default is FALSE</li>
-</ul>
-<div class="section level2">
-<h2 id="customization-examples">Customization examples<a class="anchor" aria-label="anchor" href="#customization-examples"></a>
-</h2>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>dummy_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>,<span class="fl">0</span>,<span class="fl">1</span>,<span class="fl">1</span>,<span class="fl">1</span> ,<span class="fl">0</span> ,<span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">dummy_grad</span>, var_prefix <span class="op">=</span> <span class="st">"dummy_"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 7 × 2</span></span>
-<span><span class="co">#&gt;   dummy_grad cat_grad</span></span>
-<span><span class="co">#&gt;        &lt;dbl&gt; &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1          0 not grad</span></span>
-<span><span class="co">#&gt; 2          0 not grad</span></span>
-<span><span class="co">#&gt; 3          1 grad    </span></span>
-<span><span class="co">#&gt; 4          1 grad    </span></span>
-<span><span class="co">#&gt; 5          1 grad    </span></span>
-<span><span class="co">#&gt; 6          0 not grad</span></span>
-<span><span class="co">#&gt; 7          0 not grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">T</span>,<span class="cn">T</span>,<span class="cn">F</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, negator <span class="op">=</span> <span class="st">"didn't"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 3 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad   </span></span>
-<span><span class="co">#&gt;   &lt;lgl&gt;    &lt;fct&gt;      </span></span>
-<span><span class="co">#&gt; 1 TRUE     grad       </span></span>
-<span><span class="co">#&gt; 2 TRUE     grad       </span></span>
-<span><span class="co">#&gt; 3 FALSE    didn't grad</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, cat_false <span class="op">=</span> <span class="st">"enrolled"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;   </span></span>
-<span><span class="co">#&gt; 1 Y        grad    </span></span>
-<span><span class="co">#&gt; 2 N        enrolled</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"n"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, </span>
-<span>                                cat_true <span class="op">=</span> <span class="st">"graduated"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad     </span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;        </span></span>
-<span><span class="co">#&gt; 1 y        graduated    </span></span>
-<span><span class="co">#&gt; 2 n        not graduated</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="st">"n"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, </span>
-<span>                                cat_true <span class="op">=</span> <span class="st">"graduated"</span>, </span>
-<span>                                cat_false <span class="op">=</span> <span class="st">"enrolled"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad </span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;    </span></span>
-<span><span class="co">#&gt; 1 y        graduated</span></span>
-<span><span class="co">#&gt; 2 n        enrolled</span></span>
-<span></span>
-<span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span>ind_grad <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"yes"</span>, <span class="st">"no"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad  <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">ind_grad</span>, rev <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>cat_grad_num <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="va">cat_grad</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 2 × 3</span></span>
-<span><span class="co">#&gt;   ind_grad cat_grad cat_grad_num</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;    &lt;fct&gt;           &lt;dbl&gt;</span></span>
-<span><span class="co">#&gt; 1 yes      grad                1</span></span>
-<span><span class="co">#&gt; 2 no       not grad            2</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="use-in-data-products-like-figures-and-tables">Use in data products like figures and tables<a class="anchor" aria-label="anchor" href="#use-in-data-products-like-figures-and-tables"></a>
-</h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-10-1.png" width="100%"></p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># or</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/last_plot.html" class="external-link">last_plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span>, cat_false <span class="op">=</span> <span class="st">"perished"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-10-2.png" width="100%"></p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span>  </span>
-<span><span class="co"># or</span></span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/last_plot.html" class="external-link">last_plot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span>, cat_false <span class="op">=</span> <span class="st">"didn't"</span>, rev <span class="op">=</span> <span class="cn">T</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>x <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-10-3.png" width="100%"></p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">survived</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-10-4.png" width="100%"></p>
-</div>
-</div>
-<div class="section level1">
-<h1 id="known-limitations-not-for-use-with-magrittr-pipe-but-base-pipe-works">Known Limitations: <em>not for use with magrittr pipe (but base pipe works!)</em>
-<a class="anchor" aria-label="anchor" href="#known-limitations-not-for-use-with-magrittr-pipe-but-base-pipe-works"></a>
-</h1>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="va">survived</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-11-1.png" width="100%"></p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="fu">tidytitanic</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/tidytitanic/man/passengers.html" class="external-link">passengers</a></span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x <span class="op">=</span> <span class="va">sex</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/facet_grid.html" class="external-link">facet_grid</a></span><span class="op">(</span><span class="op">~</span> <span class="va">survived</span> <span class="op">|&gt;</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-11-2.png" width="100%"></p>
-<hr>
-<p>Afterward</p>
-</div>
-<div class="section level1">
-<h1 id="other-questions-1-is-there-already-a-solution-and-2-fundamental-problems-with-this-approach">Other questions: <em>1) Is there already a solution and 2) fundamental problems with this approach?</em>
-<a class="anchor" aria-label="anchor" href="#other-questions-1-is-there-already-a-solution-and-2-fundamental-problems-with-this-approach"></a>
-</h1>
-<p>Please lemme know ’em!</p>
-<hr>
-</div>
-<div class="section level1">
-<h1 id="worked-example-with-tidytuesday-data-spam-email">worked example with tidytuesday data, Spam email<a class="anchor" aria-label="anchor" href="#worked-example-with-tidytuesday-data-spam-email"></a>
-</h1>
-<p><a href="https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-08-15" class="external-link uri">https://github.com/rfordatascience/tidytuesday/tree/master/data/2023/2023-08-15</a></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/read.table.html" class="external-link">read.csv</a></span><span class="op">(</span><span class="st">"https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2023/2023-08-15/spam.csv"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/rename.html" class="external-link">rename</a></span><span class="op">(</span>spam <span class="op">=</span> <span class="va">yesno</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>fill <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">bang</span><span class="op">&gt;</span><span class="fl">0</span><span class="op">)</span>, x <span class="op">=</span> <span class="fu"><a href="reference/ind_recode.html">ind_recode</a></span><span class="op">(</span><span class="va">spam</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"dodge"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-12-1.png" width="100%"></p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="va">remove_layers</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">plot</span>, <span class="va">index</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">{</span></span>
-<span>  </span>
-<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">index</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">plot</span><span class="op">$</span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">}</span><span class="kw">else</span><span class="op">{</span></span>
-<span>  <span class="va">plot</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="va">index</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">}</span></span>
-<span>  </span>
-<span> <span class="va">plot</span></span>
-<span>  </span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="va">last_plot_wiped</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">index</span> <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span><span class="op">{</span></span>
-<span>  </span>
-<span>  <span class="va">plot</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/last_plot.html" class="external-link">last_plot</a></span><span class="op">(</span><span class="op">)</span></span>
-<span>  </span>
-<span>  <span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/NULL.html" class="external-link">is.null</a></span><span class="op">(</span><span class="va">index</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">plot</span><span class="op">$</span><span class="va">layers</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">}</span><span class="kw">else</span><span class="op">{</span></span>
-<span>  <span class="va">plot</span><span class="op">$</span><span class="va">layers</span><span class="op">[[</span><span class="va">index</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span>
-<span>  <span class="op">}</span></span>
-<span>  </span>
-<span> <span class="va">plot</span></span>
-<span>  </span>
-<span><span class="op">}</span></span>
-<span></span>
-<span><span class="fu">last_plot_wiped</span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_bar.html" class="external-link">geom_bar</a></span><span class="op">(</span>position <span class="op">=</span> <span class="st">"fill"</span><span class="op">)</span></span></code></pre></div>
-<p><img src="reference/figures/README-unnamed-chunk-12-2.png" width="100%"> # learned along the way: <code><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor()</a></code> has different behavior than <code><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor()</a></code></p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] Y N</span></span>
-<span><span class="co">#&gt; Levels: Y N</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Y"</span>, <span class="st">"N"</span><span class="op">)</span> <span class="op"><a href="reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] Y N</span></span>
-<span><span class="co">#&gt; Levels: N Y</span></span></code></pre></div>
-</div>
 
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
@@ -539,7 +403,7 @@
 <div class="citation">
 <h2 data-toc-skip>Citation</h2>
 <ul class="list-unstyled">
-<li><a href="authors.html#citation">Citing indicatorrecode</a></li>
+<li><a href="authors.html#citation">Citing ind2cat</a></li>
 </ul>
 </div>
 

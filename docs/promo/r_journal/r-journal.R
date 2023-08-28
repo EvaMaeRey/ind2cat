@@ -10,11 +10,11 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../README.Rmd")  %>%  .[44:length(.)] %>% 
-  writeLines("../../readme_extract.Rmd")
+readLines("../../../README.Rmd")  %>%  .[44:length(.)] %>% 
+  writeLines("../../../readme_extract.Rmd")
 
 
-## ---- child = "../../readme_extract.Rmd"--------------------------------------
+## ---- child = "../../../readme_extract.Rmd"-----------------------------------
 
 ## ----manipulation_status_quo--------------------------------------------------
 library(tidyverse)

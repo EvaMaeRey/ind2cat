@@ -1,5 +1,5 @@
 ---
-title: Concise indicator variable recoding with ind2cat
+title: "Article Proposal: Concise indicator variable recoding with ind2cat"
 author:
   # see ?rjournal_article for more information
   - name: Evangeline Reynolds
@@ -33,11 +33,11 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../README.Rmd")  %>%  .[44:length(.)] %>% 
-  writeLines("../../readme_extract.Rmd")
+readLines("../../../README.Rmd")  %>%  .[44:length(.)] %>% 
+  writeLines("../../../readme_extract.Rmd")
 ```
 
-```{r, child = "../../readme_extract.Rmd"}
+```{r, child = "../../../readme_extract.Rmd"}
 ```
 
 
