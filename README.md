@@ -9,10 +9,10 @@
 
 Indicator variables are easy to create, store, and interpret
 \[@10.1177/1536867X19830921\]. They concisely encode information about
-the presence or not of a condition for observational units. The variable
-name encapsulates the information about the condition of interest, and
-the variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”) indicate
-if the condition is met for the observational unit. When using indicator
+the presence of a condition for observational units. The variable name
+encapsulates the information about the condition of interest, and the
+variable’s values (TRUE and FALSE, 1 or 0, “Yes” or “No”) indicate if
+the condition is met for the observational unit. When using indicator
 variables to use in summary products, analysts often make a choice
 between using an indicator variable as-is or crafting categorical
 variables where values can be directly interpreted. Using the indicator
@@ -43,54 +43,36 @@ light weight syntax.
 
 # Introduction
 
-Using current analytic tools analysts make a choice between directly
-using indicators or verbose recode. Current procedures for recoding
-indicator variables to a categorical variable is repetitive, but
-forgoing a recode and using indicator variables directly yields
-hard-to-interpret summary products.
+Using current analytic tools, analysts make a choice between directly
+using indicator variables or recoding the variable first to categorical.
+Current procedures for recoding indicator variables to a categorical
+variable is repetitive, but forgoing a recode and using indicator
+variables directly yields hard-to-interpret summary products.
 
-Below is demonstrated how an analyst might current recode and indicator
-variable; this method is repetitive:
+The data below inspired by email training data, demonstrates how an
+analyst might current recode an indicator variable. This method is
+repetitive; in the recoding line, ‘spam’ is typed four times.
 
 ``` r
 library(tidyverse)
-#> ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
-#> ✔ dplyr     1.1.0     ✔ readr     2.1.4
-#> ✔ forcats   1.0.0     ✔ stringr   1.5.0
-#> ✔ ggplot2   3.4.1     ✔ tibble    3.2.0
-#> ✔ lubridate 1.9.2     ✔ tidyr     1.3.0
-#> ✔ purrr     1.0.1     
-#> ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
-#> ✖ dplyr::filter() masks stats::filter()
-#> ✖ dplyr::lag()    masks stats::lag()
-#> ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
-tidytitanic::passengers %>% 
-  tibble() %>% 
-  mutate(cat_survived = ifelse(survived, 
-                               "survived", 
-                               "not survived"), 
-         .before = 1)
-#> # A tibble: 1,313 × 6
-#>    cat_survived name                                   class   age sex   survi…¹
-#>    <chr>        <chr>                                  <chr> <dbl> <chr>   <int>
-#>  1 survived     Allen, Miss Elisabeth Walton           1st   29    fema…       1
-#>  2 not survived Allison, Miss Helen Loraine            1st    2    fema…       0
-#>  3 not survived Allison, Mr Hudson Joshua Creighton    1st   30    male        0
-#>  4 not survived Allison, Mrs Hudson JC (Bessie Waldo … 1st   25    fema…       0
-#>  5 survived     Allison, Master Hudson Trevor          1st    0.92 male        1
-#>  6 survived     Anderson, Mr Harry                     1st   47    male        1
-#>  7 survived     Andrews, Miss Kornelia Theodosia       1st   63    fema…       1
-#>  8 not survived Andrews, Mr Thomas, jr                 1st   39    male        0
-#>  9 survived     Appleton, Mrs Edward Dale (Charlotte … 1st   58    fema…       1
-#> 10 not survived Artagaveytia, Mr Ramon                 1st   71    male        0
-#> # … with 1,303 more rows, and abbreviated variable name ¹​survived
+data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
+#>    spam cat_spam
+#> 1  TRUE     spam
+#> 2  TRUE     spam
+#> 3 FALSE not spam
+#> 4 FALSE not spam
+#> 5  TRUE     spam
 ```
+
+Likewise, in data visualization products, we see how repetitive recoding
+can be in the Titanic data example that follows.
 
 ``` r
 tidytitanic::passengers %>% 
 ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
+  aes(x = age) + 
+  geom_histogram() + 
   facet_grid(~ ifelse(survived, 
                       "survived", 
                       "not survived")) 
@@ -98,32 +80,36 @@ ggplot() +
 
 <img src="man/figures/README-visual_status_quo-1.png" width="100%" />
 
-This solution above also does not address category display ordering;
-ordering in products will be alphabetical and not reflect the F/T order
-of the source variable. An additional step to reflect the source
-variable, using a function like forcats::fct\_rev, may be required for
-consistency in reporting.
+This ifelse() approach to recoding above also has the disadvantage of
+not consistently ordering the resultant categories; ordering in products
+will be alphabetical and not reflect the F/T order of the source
+variable. An additional step to reflect the source variable, using a
+function like forcats::fct\_rev, may be required for consistent
+reporting.
 
 ``` r
-data.frame(ind_daytime = c(T, F, T, T)) %>% 
-    mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
-  mutate(cat_survived = fct_rev(cat_survived)) %>% 
+data.frame(ind_grad = c(T, F, T, T)) %>% 
+    mutate(cat_grad = ifelse(ind_grad, "grad", "not grad")) %>% 
+  mutate(cat_grad = fct_rev(cat_grad)) %>% 
   ggplot() + 
-  aes(x = cat_survived) + 
+  aes(x = cat_grad) + 
   geom_bar()
 ```
 
 <img src="man/figures/README-visual_status_quo_order-1.png" width="100%" />
 
-Given how verbose recoding can be, analyst may choose to forego a
-recoding the variable, especially in exploratory analysis.
+Given how verbose recoding an indicator variable can be, analysts may
+choose to forego a recoding the variable, especially in exploratory
+analysis.
 
 However, when indicator variables are used directly in data summary
 products like tables and visuals, information is often awkwardly
 displayed and is sometimes lost.
 
-Below, the column header comes from the indicator variable name allowing
-savvy readers to interpret the output, but interpretation is awkward:
+Below, the table that is created by using the indicator variable
+directly is awkward to interpret. The indicator variable name persists
+in the output allowing savvy readers to interpret the output, but
+communication is strained.
 
 ``` r
 tidytitanic::passengers %>% 
@@ -133,8 +119,9 @@ tidytitanic::passengers %>%
 #> 2        1 450
 ```
 
-In the following two-way table, information is completely lost due to
-using the indicator variable directly:
+In the following two-way table produced using an indicator variable
+directly with the popular janitor package, information is completely
+lost:
 
 ``` r
 tidytitanic::passengers %>% 
@@ -144,8 +131,8 @@ tidytitanic::passengers %>%
 #>    male 709 142
 ```
 
-In the following visual summary of the data, where the indicator
-variable is directly used, interpretation is awkward.
+Likewise, in the following visual summary of the data, where an
+indicator variable is directly used, interpretation is awkward.
 
 ``` r
 library(tidyverse)
@@ -168,8 +155,9 @@ A. Bar labels + axis label preserves information but is awkward
 
 </div>
 
-If used as a faceting variable with the ggplot2 library, information is
-lost and the graph is not directly interpretable.
+Moreover, when indicator variables are used directly as faceting
+variable for plots produced by the popular ggplot2 library, information
+is lost and the plot is not directly interpretable.
 
 ``` r
 tidytitanic::passengers %>% 
@@ -177,8 +165,6 @@ ggplot() +
   aes(x = age) + 
   geom_histogram() + 
   facet_grid(~ survived)
-#> `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
-#> Warning: Removed 557 rows containing non-finite values (`stat_bin()`).
 ```
 
 <div class="figure">
@@ -196,8 +182,9 @@ results in information loss
 
 # Introducing ind2cat::ind\_recode
 
-The ind2cat::ind\_recode() function uses variable name to automatically
-derive human-readable, and appropriately ordered categories.
+The ind2cat::ind\_recode() function uses indicator variable names to
+automatically derive human-readable, and appropriately ordered
+categories.
 
 <!-- Usually I'll start with the sketch of a function right here, but then I eventually move it to an .R file. -->
 
@@ -241,8 +228,9 @@ data.frame(ind_graduated =
 #> 3         FALSE not graduated
 ```
 
-The indicator variable can be populated with TRUE/FALSE values as well
-as 1/0 or “Yes”/“No” (and variants ‘y/n’ for example).
+The function ind\_recode is flexible, and can recode from variable
+populated with TRUE/FALSE values as well as 1/0 or “Yes”/“No” (and
+variants ‘y/n’ for example).
 
 Furthermore, while ind\_recode default functionality allows analysts to
 move from its first-cut human-readable recode, it also allows fully
@@ -462,4 +450,36 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 
 
 }
+```
+
+-----
+
+# README.Rmd chunks names
+
+``` r
+knitr::knit_code$get() |> names()
+#>  [1] "setup"                                
+#>  [2] "manipulation_status_quo"              
+#>  [3] "visual_status_quo"                    
+#>  [4] "visual_status_quo_order"              
+#>  [5] "direct_table_awkward"                 
+#>  [6] "direct_table_loss"                    
+#>  [7] "direct_visual_awkward"                
+#>  [8] "direct_visual_loss"                   
+#>  [9] "manipulation_status_quo_reprise"      
+#> [10] "manipulation_ind2cat"                 
+#> [11] "manipulation_ind2cat_custom"          
+#> [12] "manipulation_ind2cat_cat_true"        
+#> [13] "manipulation_ind2cat_negator"         
+#> [14] "manipulation_ind2cat_false_cat"       
+#> [15] "manipulation_ind2cat_rev"             
+#> [16] "manipulation_ind2cat_prefix"          
+#> [17] "visual_ind2cat_improves"              
+#> [18] "visual_ind2cat_improves_cat_false"    
+#> [19] "visual_ind2cat_improves_cat_false_rev"
+#> [20] "visual_ind2cat_preserves"             
+#> [21] "table_ind2cat_preserves"              
+#> [22] "unnamed-chunk-1"                      
+#> [23] "unnamed-chunk-2"                      
+#> [24] "unnamed-chunk-3"
 ```

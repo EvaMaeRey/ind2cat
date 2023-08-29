@@ -1,0 +1,26 @@
+---
+title: "cover letter"
+author: "Evangeline Reynolds"
+date: "8/29/2023"
+output: html_document
+---
+
+
+```{r read_in_chunks, eval = T, echo = F, results='hide'}
+knitr::knit_child("../../../README.rmd")
+```
+
+```{r}
+library(ggjudge)
+ggjudge::judge_chunk_code("direct_table_awkward")
+```
+
+
+
+---
+
+# letter chunk names
+
+```{r}
+knitr::knit_code$get() |> names()
+```
