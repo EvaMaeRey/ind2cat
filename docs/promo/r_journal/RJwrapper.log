@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  28 AUG 2023 12:21
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015) (preloaded format=pdflatex 2015.5.24)  30 AUG 2023 11:00
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -1158,12 +1158,12 @@ Package natbib Warning: Citation `10.1177/1536867X19830921' on page 1 undefined
 
 LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <12> not available
 (Font)              Font shape `T1/ppl/b/n' tried instead on input line 26.
-LaTeX Font Info:    Try loading font information for T1+zi4 on input line 38.
+LaTeX Font Info:    Try loading font information for T1+zi4 on input line 39.
 (/usr/local/texlive/2015/texmf-dist/tex/latex/inconsolata/t1zi4.fd
 File: t1zi4.fd 2014/06/22 T1/zi4 (Inconsolata)
 )
 LaTeX Font Info:    Font shape `T1/zi4/m/n' will be
-(Font)              scaled to size 9.18004pt on input line 38.
+(Font)              scaled to size 9.18004pt on input line 39.
 Package microtype Info: Loading generic settings for font family
 (microtype)             `zi4' (encoding: T1).
 (microtype)             For optimal results, create family-specific settings.
@@ -1175,105 +1175,73 @@ Package microtype Info: Character `textemdash ' is missing
 (microtype)             in font `T1/zi4/m/n/9'.
 (microtype)             Ignoring protrusion settings for this character.
 
-<r_journal_files/figure-latex/visual_status_quo-1.pdf, id=31, 458.71375pt x 313
-.17pt>
+<r_journal_files/figure-latex/visual_status_quo-1.pdf, id=35, 458.71375pt x 315
+.1775pt>
 File: r_journal_files/figure-latex/visual_status_quo-1.pdf Graphic file (type p
 df)
 <use r_journal_files/figure-latex/visual_status_quo-1.pdf>
 Package pdftex.def Info: r_journal_files/figure-latex/visual_status_quo-1.pdf u
-sed on input line 76.
-(pdftex.def)             Requested size: 274.85458pt x 187.65495pt.
+sed on input line 68.
+(pdftex.def)             Requested size: 274.85458pt x 188.85788pt.
 [1{/usr/local/texlive/2015/texmf-var/fonts/map/pdftex/updmap/pdftex.map}
 
 ]
-<r_journal_files/figure-latex/visual_status_quo_order-1.pdf, id=44, 458.71375pt
- x 315.1775pt>
+<r_journal_files/figure-latex/visual_status_quo_order-1.pdf, id=48, 458.71375pt
+ x 316.18124pt>
 File: r_journal_files/figure-latex/visual_status_quo_order-1.pdf Graphic file (
 type pdf)
 <use r_journal_files/figure-latex/visual_status_quo_order-1.pdf>
 Package pdftex.def Info: r_journal_files/figure-latex/visual_status_quo_order-1
-.pdf used on input line 94.
-(pdftex.def)             Requested size: 274.85458pt x 188.85788pt.
+.pdf used on input line 87.
+(pdftex.def)             Requested size: 274.85458pt x 189.45932pt.
 [2 <./r_journal_files/figure-latex/visual_status_quo-1.pdf> <./r_journal_files/
 figure-latex/visual_status_quo_order-1.pdf>]
-<r_journal_files/figure-latex/direct_visual_awkward-1.pdf, id=63, 458.71375pt x
+<r_journal_files/figure-latex/direct_visual_awkward-1.pdf, id=67, 458.71375pt x
  313.17pt>
 File: r_journal_files/figure-latex/direct_visual_awkward-1.pdf Graphic file (ty
 pe pdf)
 <use r_journal_files/figure-latex/direct_visual_awkward-1.pdf>
 Package pdftex.def Info: r_journal_files/figure-latex/direct_visual_awkward-1.p
-df used on input line 146.
+df used on input line 139.
 (pdftex.def)             Requested size: 274.85458pt x 187.65495pt.
 
-<r_journal_files/figure-latex/direct_visual_loss-1.pdf, id=64, 458.71375pt x 31
+<r_journal_files/figure-latex/direct_visual_loss-1.pdf, id=68, 458.71375pt x 31
 5.1775pt>
 File: r_journal_files/figure-latex/direct_visual_loss-1.pdf Graphic file (type 
 pdf)
 <use r_journal_files/figure-latex/direct_visual_loss-1.pdf>
 Package pdftex.def Info: r_journal_files/figure-latex/direct_visual_loss-1.pdf 
-used on input line 162.
+used on input line 156.
 (pdftex.def)             Requested size: 274.85458pt x 188.85788pt.
 [3 <./r_journal_files/figure-latex/direct_visual_awkward-1.pdf> <./r_journal_fi
-les/figure-latex/direct_visual_loss-1.pdf>]
-LaTeX Font Info:    Try loading font information for TS1+ppl on input line 230.
+les/figure-latex/direct_visual_loss-1.pdf>] [4]
+LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10> not available
+(Font)              Font shape `T1/ppl/b/n' tried instead on input line 322.
+[5]
+<r_journal_files/figure-latex/visual_ind2cat_customization_in_visualizations-1.
+pdf, id=99, 842.14626pt x 1059.96pt>
+File: r_journal_files/figure-latex/visual_ind2cat_customization_in_visualizatio
+ns-1.pdf Graphic file (type pdf)
 
-(/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ts1ppl.fd
-File: ts1ppl.fd 2001/06/04 font definitions for TS1/ppl.
-) [4]
-LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 280.
+<use r_journal_files/figure-latex/visual_ind2cat_customization_in_visualization
+s-1.pdf>
+Package pdftex.def Info: r_journal_files/figure-latex/visual_ind2cat_customizat
+ion_in_visualizations-1.pdf used on input line 362.
+(pdftex.def)             Requested size: 274.85458pt x 345.93855pt.
+[6 <./r_journal_files/figure-latex/visual_ind2cat_customization_in_visualizatio
+ns-1.pdf>]
+LaTeX Font Info:    Try loading font information for TS1+zi4 on input line 395.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/inconsolata/ts1zi4.fd
 File: ts1zi4.fd 2014/06/22 Fontinst v1.933 font definitions for TS1/zi4.
 )
 LaTeX Font Info:    Font shape `TS1/zi4/m/n' will be
-(Font)              scaled to size 9.18004pt on input line 280.
+(Font)              scaled to size 9.18004pt on input line 395.
 Package microtype Info: Loading generic settings for font family
 (microtype)             `zi4' (encoding: TS1).
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
-LaTeX Font Info:    Font shape `T1/ppl/bx/n' in size <10> not available
-(Font)              Font shape `T1/ppl/b/n' tried instead on input line 342.
-
-<r_journal_files/figure-latex/visual_ind2cat_improves-1.pdf, id=90, 458.71375pt
- x 315.1775pt>
-File: r_journal_files/figure-latex/visual_ind2cat_improves-1.pdf Graphic file (
-type pdf)
-<use r_journal_files/figure-latex/visual_ind2cat_improves-1.pdf>
-Package pdftex.def Info: r_journal_files/figure-latex/visual_ind2cat_improves-1
-.pdf used on input line 355.
-(pdftex.def)             Requested size: 274.85458pt x 188.85788pt.
-[5]
-<r_journal_files/figure-latex/visual_ind2cat_improves_cat_false-1.pdf, id=97, 4
-58.71375pt x 316.18124pt>
-File: r_journal_files/figure-latex/visual_ind2cat_improves_cat_false-1.pdf Grap
-hic file (type pdf)
-<use r_journal_files/figure-latex/visual_ind2cat_improves_cat_false-1.pdf>
-Package pdftex.def Info: r_journal_files/figure-latex/visual_ind2cat_improves_c
-at_false-1.pdf used on input line 364.
-(pdftex.def)             Requested size: 274.85458pt x 189.45932pt.
-
-<r_journal_files/figure-latex/visual_ind2cat_improves_cat_false_rev-1.pdf, id=9
-8, 458.71375pt x 313.17pt>
-File: r_journal_files/figure-latex/visual_ind2cat_improves_cat_false_rev-1.pdf 
-Graphic file (type pdf)
-
-<use r_journal_files/figure-latex/visual_ind2cat_improves_cat_false_rev-1.pdf>
-Package pdftex.def Info: r_journal_files/figure-latex/visual_ind2cat_improves_c
-at_false_rev-1.pdf used on input line 374.
-(pdftex.def)             Requested size: 274.85458pt x 187.65495pt.
-[6 <./r_journal_files/figure-latex/visual_ind2cat_improves-1.pdf> <./r_journal_
-files/figure-latex/visual_ind2cat_improves_cat_false-1.pdf> <./r_journal_files/
-figure-latex/visual_ind2cat_improves_cat_false_rev-1.pdf>]
-<r_journal_files/figure-latex/visual_ind2cat_preserves-1.pdf, id=124, 458.71375
-pt x 313.17pt>
-File: r_journal_files/figure-latex/visual_ind2cat_preserves-1.pdf Graphic file 
-(type pdf)
-<use r_journal_files/figure-latex/visual_ind2cat_preserves-1.pdf>
-Package pdftex.def Info: r_journal_files/figure-latex/visual_ind2cat_preserves-
-1.pdf used on input line 385.
-(pdftex.def)             Requested size: 274.85458pt x 187.65495pt.
-[7 <./r_journal_files/figure-latex/visual_ind2cat_preserves-1.pdf>] (./RJwrappe
-r.bbl (./RJwrapper.brf)
+[7] (./RJwrapper.bbl (./RJwrapper.brf)
 \tf@brf=\write6
 \openout6 = `RJwrapper.brf'.
 
@@ -1283,29 +1251,29 @@ Package natbib Warning: Empty `thebibliography' environment on input line 8.
 )
 
 LaTeX Font Warning: Font shape `T1/zi4/m/it' undefined
-(Font)              using `T1/zi4/m/n' instead on input line 492.
+(Font)              using `T1/zi4/m/n' instead on input line 503.
 
-LaTeX Font Info:    Try loading font information for OT1+ppl on input line 492.
+LaTeX Font Info:    Try loading font information for OT1+ppl on input line 503.
 
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ot1ppl.fd
 File: ot1ppl.fd 2001/06/04 font definitions for OT1/ppl.
 )
-LaTeX Font Info:    Try loading font information for OML+zplm on input line 492
+LaTeX Font Info:    Try loading font information for OML+zplm on input line 503
 .
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/omlzplm.fd
 File: omlzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OML/zplm.
 )
-LaTeX Font Info:    Try loading font information for OMS+zplm on input line 492
+LaTeX Font Info:    Try loading font information for OMS+zplm on input line 503
 .
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/omszplm.fd
 File: omszplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMS/zplm.
 )
-LaTeX Font Info:    Try loading font information for OMX+zplm on input line 492
+LaTeX Font Info:    Try loading font information for OMX+zplm on input line 503
 .
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/omxzplm.fd
 File: omxzplm.fd 2002/09/08 Fontinst v1.914 font definitions for OMX/zplm.
 )
-LaTeX Font Info:    Try loading font information for OT1+zplm on input line 492
+LaTeX Font Info:    Try loading font information for OT1+zplm on input line 503
 .
 (/usr/local/texlive/2015/texmf-dist/tex/latex/psnfss/ot1zplm.fd
 File: ot1zplm.fd 2002/09/08 Fontinst v1.914 font definitions for OT1/zplm.
@@ -1315,25 +1283,25 @@ Package microtype Info: Loading generic settings for font family
 (microtype)             For optimal results, create family-specific settings.
 (microtype)             See the microtype manual for details.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 9.37807pt on input line 492.
+(Font)              scaled to size 9.37807pt on input line 503.
 (/usr/local/texlive/2015/texmf-dist/tex/latex/microtype/mt-msa.cfg
 File: mt-msa.cfg 2006/02/04 v1.1 microtype config. file: AMS symbols (a) (RS)
 )
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 7.29405pt on input line 492.
+(Font)              scaled to size 7.29405pt on input line 503.
 LaTeX Font Info:    Font shape `U/msa/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 492.
+(Font)              scaled to size 5.21004pt on input line 503.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 9.37807pt on input line 492.
+(Font)              scaled to size 9.37807pt on input line 503.
 (/usr/local/texlive/2015/texmf-dist/tex/latex/microtype/mt-msb.cfg
 File: mt-msb.cfg 2005/06/01 v1.0 microtype config. file: AMS symbols (b) (RS)
 )
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 7.29405pt on input line 492.
+(Font)              scaled to size 7.29405pt on input line 503.
 LaTeX Font Info:    Font shape `U/msb/m/n' will be
-(Font)              scaled to size 5.21004pt on input line 492.
+(Font)              scaled to size 5.21004pt on input line 503.
 LaTeX Font Info:    Font shape `T1/zi4/m/it' will be
-(Font)              scaled to size 9.18004pt on input line 492.
+(Font)              scaled to size 9.18004pt on input line 503.
 Package microtype Info: Character `textendash ' is missing
 (microtype)             in font `T1/zi4/m/it/9'.
 (microtype)             Ignoring protrusion settings for this character.
@@ -1351,7 +1319,7 @@ Package atveryend Info: Empty hook `AfterLastShipout' on input line 32.
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 32.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 32.
 Package rerunfilecheck Info: File `RJwrapper.out' has not changed.
-(rerunfilecheck)             Checksum: 3CA6644019AC838B76D3A7EFCF4EC275;465.
+(rerunfilecheck)             Checksum: 4E410FDEA82931811FD08CCE06B3DCD1;535.
 Package rerunfilecheck Info: File `RJwrapper.brf' has not changed.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
 
@@ -1360,13 +1328,13 @@ LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 32.
  ) 
 Here is how much of TeX's memory you used:
- 21476 strings out of 493089
- 387026 string characters out of 6134842
- 482213 words of memory out of 5000000
- 24411 multiletter control sequences out of 15000+600000
- 32468 words of font info for 108 fonts, out of 8000000 for 9000
+ 21454 strings out of 493089
+ 385976 string characters out of 6134842
+ 482263 words of memory out of 5000000
+ 24380 multiletter control sequences out of 15000+600000
+ 32709 words of font info for 116 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
- 62i,12n,56p,425b,613s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 62i,12n,56p,425b,611s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/inconsolata/i4-ts1.enc}{/
 usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}{/usr
 /local/texlive/2015/texmf-dist/fonts/enc/dvips/base/8r.enc}</usr/local/texlive/
@@ -1374,10 +1342,10 @@ usr/local/texlive/2015/texmf-dist/fonts/enc/dvips/inconsolata/i4-t1-0.enc}{/usr
 /texlive/2015/texmf-dist/fonts/type1/urw/palatino/uplb8a.pfb></usr/local/texliv
 e/2015/texmf-dist/fonts/type1/urw/palatino/uplr8a.pfb></usr/local/texlive/2015/
 texmf-dist/fonts/type1/urw/palatino/uplri8a.pfb>
-Output written on RJwrapper.pdf (8 pages, 117202 bytes).
+Output written on RJwrapper.pdf (8 pages, 109357 bytes).
 PDF statistics:
- 173 PDF objects out of 1000 (max. 8388607)
- 133 compressed objects within 2 object streams
- 24 named destinations out of 1000 (max. 500000)
- 31333 words of extra memory for PDF output out of 35830 (max. 10000000)
+ 155 PDF objects out of 1000 (max. 8388607)
+ 124 compressed objects within 2 object streams
+ 26 named destinations out of 1000 (max. 500000)
+ 30814 words of extra memory for PDF output out of 35830 (max. 10000000)
 

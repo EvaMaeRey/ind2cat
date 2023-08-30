@@ -40,7 +40,7 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
     cat_false = paste(negator, cat_true)
   }
 
-  # for yes/no case
+  # for yes/no case - dangerously.
   if(is.character({{var}})){
 
     my_var <- {{var}} %>% as.factor() %>% as.numeric() - 1

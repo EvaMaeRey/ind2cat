@@ -10,7 +10,7 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../../README.Rmd")  %>%  .[44:length(.)] %>% 
+readLines("../../../README.Rmd")  %>%  .[46:length(.)] %>% 
   writeLines("../../../readme_extract.Rmd")
 
 
@@ -18,31 +18,26 @@ readLines("../../../README.Rmd")  %>%  .[44:length(.)] %>%
 
 ## ----manipulation_status_quo--------------------------------------------------
 library(tidyverse)
-tidytitanic::passengers %>% 
-  tibble() %>% 
-  mutate(cat_survived = ifelse(survived, 
-                               "survived", 
-                               "not survived"), 
-         .before = 1)
+data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
 
 
 ## ----visual_status_quo--------------------------------------------------------
 tidytitanic::passengers %>% 
 ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
+  aes(x = age) + 
+  geom_histogram() + 
   facet_grid(~ ifelse(survived, 
                       "survived", 
                       "not survived")) 
 
 
 ## ----visual_status_quo_order--------------------------------------------------
-data.frame(ind_daytime = c(T, F, T, T)) %>% 
-    mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
-  mutate(cat_survived = fct_rev(cat_survived)) %>% 
+data.frame(ind_grad = c(T, F, T, T)) %>% 
   ggplot() + 
-  aes(x = cat_survived) + 
+  aes(x = fct_rev(ifelse(ind_grad, "grad", "not grad"))) +
   geom_bar()
+
 
 
 ## ----direct_table_awkward-----------------------------------------------------
@@ -102,69 +97,64 @@ data.frame(ind_graduated = c(T,T,F)) %>%
                                      cat_false = "current"))
 
 
-## ----manipulation_custom_cat_true---------------------------------------------
-
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated"))
-
-
-## ----manipulation_custom_negator----------------------------------------------
-
+## ----manipulation_ind2cat_negator---------------------------------------------
 tibble(ind_grad = c(T,T,F)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
+  mutate(cat_grad  = ind_recode(ind_grad, negator = "~"))
 
 
-## ----manipulation_custom_false_cat--------------------------------------------
+## ----manipulation_ind2cat_false_cat-------------------------------------------
 tibble(ind_grad = c("Y", "N")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, cat_false = "enrolled"))
 
 
-## ----manipulation_custom_rev--------------------------------------------------
+## ----manipulation_ind2cat_rev-------------------------------------------------
 tibble(ind_grad = c("yes", "no")) %>%
   mutate(cat_grad  = ind_recode(ind_grad, rev = TRUE)) %>% 
   mutate(cat_grad_num = as.numeric(cat_grad))
 
 
-## ----manipulation_custom_prefix-----------------------------------------------
-tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
+## ----manipulation_ind2cat_prefix----------------------------------------------
+tibble(dummy_grad = c(0, 0, 1, 1, 1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(dummy_grad, 
+                                var_prefix = "dummy_"))
 
 
-
-## ----visual_ind2cat_improves--------------------------------------------------
-tidytitanic::passengers %>% 
+## ----visual_ind2cat_customization_in_visualizations, fig.width=12, fig.height=15----
+data.frame(ind_spam = c(TRUE, TRUE, FALSE, FALSE, FALSE)) %>% 
 ggplot() + 
-  aes(x = ind_recode(survived)) + 
-  geom_bar()
+  aes(x = ind_recode(ind_spam)) + 
+  geom_bar() +
+  theme_gray(base_size = 15)->
+p1
+
+p1 +
+  aes(x = ind_recode(ind_spam, cat_true = "suspicious")) ->
+p2
+
+p1 +
+  aes(x = ind_recode(ind_spam, negator = "~")) ->
+p3
+
+p1 +
+  aes(x = ind_recode(ind_spam, cat_false = "trustworthy")) ->
+p4
 
 
-## ----visual_ind2cat_improves_cat_false----------------------------------------
-# or
-last_plot() +
-  aes(x = ind_recode(survived, cat_false = "perished"))
+p1 +
+  aes(x = ind_recode(ind_spam, rev = TRUE)) ->
+p5
 
+library(patchwork)
 
-## ----visual_ind2cat_improves_cat_false_rev------------------------------------
-# or
-last_plot() +
-  aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
-  labs(x = NULL)
-
-
-
-## ----visual_ind2cat_preserves-------------------------------------------------
-
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ ind_recode(survived))
+(p1 + p2) /
+  (p3 + p4) /
+  (p5 + patchwork::plot_spacer())
 
 
 ## ----table_ind2cat_preserves--------------------------------------------------
 tidytitanic::passengers %>%
-  mutate(cat_survived = ind_recode(survived)) %>% 
+  mutate(cat_survived = ind_recode(survived, 
+                                   cat_false = "perished")) %>% 
   janitor::tabyl(sex, cat_survived) %>% 
   janitor::adorn_percentages() %>% 
   janitor::adorn_pct_formatting() %>% 
@@ -177,5 +167,9 @@ readLines("R/ind_recode.R") -> implementation
 
 ## ---- code = implementation, eval= F------------------------------------------
 #> NA
+
+
+## -----------------------------------------------------------------------------
+knitr::knit_code$get() |> names()
 
 

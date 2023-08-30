@@ -19,55 +19,47 @@ yields poor results in summary products. \{\{ind2cat\}\} can help
 analysts concisely translate indicator variables to categorical
 variables for reporting products, yielding more polished outputs. By
 default, ind2cat creates the categorical variable from the indicator
-variable name, resulting in a light weight syntax.
+variable name, resulting in a light-weight syntax.
 }
 
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Using current analytic tools analysts make a choice between directly
-using indicators or verbose recode. Current procedures for recoding
-indicator variables to a categorical variable is repetitive, but
-forgoing a recode and using indicator variables directly yields
-hard-to-interpret summary products.
+Using current analytic tools, analysts make a choice between directly
+using indicator variables or recoding the variable first to categorical.
+Current procedures for recoding indicator variables to a categorical
+variable is repetitive, but forgoing a recode and using indicator
+variables directly yields hard-to-interpret summary products.
 
-Below is demonstrated how an analyst might current recode and indicator
-variable; this method is repetitive:
+The data below inspired by email training data, demonstrates how an
+analyst might current recode an indicator variable. This method is
+repetitive; in the recoding line, `spam' is typed four times.
 
 \begin{Schunk}
 \begin{Sinput}
 library(tidyverse)
-tidytitanic::passengers %>% 
-  tibble() %>% 
-  mutate(cat_survived = ifelse(survived, 
-                               "survived", 
-                               "not survived"), 
-         .before = 1)
+data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
 \end{Sinput}
 \begin{Soutput}
-     # A tibble: 1,313 x 6
-        cat_survived name                                   class   age sex   survi~1
-        <chr>        <chr>                                  <chr> <dbl> <chr>   <int>
-      1 survived     Allen, Miss Elisabeth Walton           1st   29    fema~       1
-      2 not survived Allison, Miss Helen Loraine            1st    2    fema~       0
-      3 not survived Allison, Mr Hudson Joshua Creighton    1st   30    male        0
-      4 not survived Allison, Mrs Hudson JC (Bessie Waldo ~ 1st   25    fema~       0
-      5 survived     Allison, Master Hudson Trevor          1st    0.92 male        1
-      6 survived     Anderson, Mr Harry                     1st   47    male        1
-      7 survived     Andrews, Miss Kornelia Theodosia       1st   63    fema~       1
-      8 not survived Andrews, Mr Thomas, jr                 1st   39    male        0
-      9 survived     Appleton, Mrs Edward Dale (Charlotte ~ 1st   58    fema~       1
-     10 not survived Artagaveytia, Mr Ramon                 1st   71    male        0
-     # ... with 1,303 more rows, and abbreviated variable name 1: survived
+        spam cat_spam
+     1  TRUE     spam
+     2  TRUE     spam
+     3 FALSE not spam
+     4 FALSE not spam
+     5  TRUE     spam
 \end{Soutput}
 \end{Schunk}
+
+Likewise, in data visualization products where recoding can be done on
+the fly, we see that the process can be repetative.
 
 \begin{Schunk}
 \begin{Sinput}
 tidytitanic::passengers %>% 
 ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
+  aes(x = age) + 
+  geom_histogram() + 
   facet_grid(~ ifelse(survived, 
                       "survived", 
                       "not survived")) 
@@ -75,33 +67,33 @@ ggplot() +
 
 \includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_status_quo-1} \end{Schunk}
 
-This solution above also does not address category display ordering;
-ordering in products will be alphabetical and not reflect the F/T order
-of the source variable. An additional step to reflect the source
-variable, using a function like forcats::fct\_rev, may be required for
-consistency in reporting.
+Furthermore, the \texttt{ifelse()} approach to recoding indicator
+variables also has the disadvantage of not consistently ordering the
+resultant categories; ordering in products will be alphabetical and not
+reflect the F/T order of the source variable. An additional step to
+reflect the source variable, using a function like forcats::fct\_rev,
+may be required for consistent reporting. We show this with another
+visualization example, and see that the definition of the x axis becomes
+easy to reason about.
 
 \begin{Schunk}
 \begin{Sinput}
-data.frame(ind_daytime = c(T, F, T, T)) %>% 
-    mutate(cat_survived = ifelse(ind_daytime, "daytime", "not daytime")) %>% 
-  mutate(cat_survived = fct_rev(cat_survived)) %>% 
+data.frame(ind_grad = c(T, F, T, T)) %>% 
   ggplot() + 
-  aes(x = cat_survived) + 
+  aes(x = fct_rev(ifelse(ind_grad, "grad", "not grad"))) +
   geom_bar()
 \end{Sinput}
 
 \includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_status_quo_order-1} \end{Schunk}
 
-Given how verbose recoding can be, analyst may choose to forego a
-recoding the variable, especially in exploratory analysis.
-
-However, when indicator variables are used directly in data summary
-products like tables and visuals, information is often awkwardly
-displayed and is sometimes lost.
-
-Below, the column header comes from the indicator variable name allowing
-savvy readers to interpret the output, but interpretation is awkward:
+Given how verbose recoding an indicator variable can be, analysts may
+choose to forego a recoding the variable, especially in exploratory
+analysis. However, when indicator variables are used directly in data
+summary products like tables and visuals, information is often awkwardly
+displayed and is sometimes lost. Below, the table that is created by
+using the indicator variable directly is awkward to interpret. The
+indicator variable name persists in the output allowing savvy readers to
+interpret the output, but communication is strained.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -115,8 +107,9 @@ tidytitanic::passengers %>%
 \end{Soutput}
 \end{Schunk}
 
-In the following two-way table, information is completely lost due to
-using the indicator variable directly:
+In the following two-way table produced using an indicator variable
+directly with the popular janitor package, information is completely
+lost:
 
 \begin{Schunk}
 \begin{Sinput}
@@ -130,8 +123,8 @@ tidytitanic::passengers %>%
 \end{Soutput}
 \end{Schunk}
 
-In the following visual summary of the data, where the indicator
-variable is directly used, interpretation is awkward.
+Likewise, in the following visual summary of the data, where an
+indicator variable is directly used, interpretation is awkward.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -147,8 +140,9 @@ tidytitanic::passengers %>%
 \end{figure}
 \end{Schunk}
 
-If used as a faceting variable with the ggplot2 library, information is
-lost and the graph is not directly interpretable.
+Moreover, when indicator variables are used directly as faceting
+variable for plots produced by the popular ggplot2 library, information
+is lost and the plot is not directly interpretable.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -167,8 +161,9 @@ ggplot() +
 \section{Introducing
 ind2cat::ind\_recode}\label{introducing-ind2catind_recode}}
 
-The ind2cat::ind\_recode() function uses variable name to automatically
-derive human-readable, and appropriately ordered categories.
+The ind2cat::ind\_recode() function uses indicator variable names to
+automatically derive human-readable, and appropriately ordered
+categories.
 
 To clearly compare the new method, we reiterate the status quo with a
 toy example:
@@ -218,32 +213,18 @@ data.frame(ind_graduated =
 \end{Soutput}
 \end{Schunk}
 
-The indicator variable can be populated with TRUE/FALSE values as well
-as 1/0 or ``Yes''/``No'' (and variants `y/n' for example).
+The function ind\_recode is flexible, and can recode from variable
+populated with TRUE/FALSE values as well as 1/0 or ``Yes''/``No'' (and
+variants `y/n' for example).
 
 Furthermore, while ind\_recode default functionality allows analysts to
 move from its first-cut human-readable recode, it also allows fully
 customized categories via adjustment of the functions parameters.
 
-\begin{itemize}
-\item
-  cat\_true a character string string to be used place of T/1/``Yes''
-  for the categorical variable output, if NULL the category is
-  automatically generated from the variable name
-\item
-  negator a character string used to create cat\_false when cat\_false
-  is NULL, default is `not'
-\item
-  cat\_false a character string string to be used place of F/0/``No''
-  for the categorical variable output, if NULL the category is
-  automatically generated from cat\_true and the negator
-\item
-  rev logical indicating if the order should be reversed from the F/T
-  ordering of the indicator source variable, default is FALSE
-\item
-  var\_prefix a character string that will be ignored when creating the
-  categorical variable
-\end{itemize}
+If the category associated with `TRUE' should be modified (default is
+based on the variable name), the \texttt{cat\_true} may be used as
+follows. Note that the false category is generated from the TRUE
+category by default.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -259,35 +240,26 @@ data.frame(ind_graduated = c(T,T,F)) %>%
 \end{Soutput}
 \end{Schunk}
 
-\begin{Schunk}
-\begin{Sinput}
-tibble(ind_grad = c("y", "n")) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, 
-                                cat_true = "graduated"))
-\end{Sinput}
-\begin{Soutput}
-     # A tibble: 2 x 2
-       ind_grad cat_grad     
-       <chr>    <fct>        
-     1 y        graduated    
-     2 n        not graduated
-\end{Soutput}
-\end{Schunk}
+Also, the default negator `not' can be changed by setting the
+\texttt{negator} argument.
 
 \begin{Schunk}
 \begin{Sinput}
 tibble(ind_grad = c(T,T,F)) %>%
-  mutate(cat_grad  = ind_recode(ind_grad, negator = "didn't"))
+  mutate(cat_grad  = ind_recode(ind_grad, negator = "~"))
 \end{Sinput}
 \begin{Soutput}
      # A tibble: 3 x 2
-       ind_grad cat_grad   
-       <lgl>    <fct>      
-     1 TRUE     grad       
-     2 TRUE     grad       
-     3 FALSE    didn't grad
+       ind_grad cat_grad
+       <lgl>    <fct>   
+     1 TRUE     grad    
+     2 TRUE     grad    
+     3 FALSE    ~ grad
 \end{Soutput}
 \end{Schunk}
+
+If the negative category should be independently specified, the
+\texttt{cat\_false} argument can be set:
 
 \begin{Schunk}
 \begin{Sinput}
@@ -302,6 +274,9 @@ tibble(ind_grad = c("Y", "N")) %>%
      2 N        enrolled
 \end{Soutput}
 \end{Schunk}
+
+Also, if the derived category's levels should be reversed,
+i.e.~{[}1,0{]} instead of the default {[}0,1{]}, rev can be set to TRUE.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -318,10 +293,15 @@ tibble(ind_grad = c("yes", "no")) %>%
 \end{Soutput}
 \end{Schunk}
 
+Finally, several indicator variable prefixes are automatically removed
+with the default setting, includeing \texttt{ind\_} and \texttt{IND\_}.
+This behavior can be modified using the \texttt{var\_prefix} argument.
+
 \begin{Schunk}
 \begin{Sinput}
-tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
-  mutate(cat_grad  = ind_recode(dummy_grad, var_prefix = "dummy_"))
+tibble(dummy_grad = c(0, 0, 1, 1, 1 ,0 ,0)) %>%
+  mutate(cat_grad  = ind_recode(dummy_grad, 
+                                var_prefix = "dummy_"))
 \end{Sinput}
 \begin{Soutput}
      # A tibble: 7 x 2
@@ -341,62 +321,60 @@ tibble(dummy_grad = c(0,0,1,1,1 ,0 ,0)) %>%
 \subsection{Use in data products like figures and
 tables}\label{use-in-data-products-like-figures-and-tables}}
 
-In what follows, we show ind2cat's use in summary products, which is a
-main motivation for ind2cat.
+In the summary figure, we show the values that result from using
+ind\_recode on the fly in ggplot2. In a true-to-life analytic reporting
+space, the analyst could then use \texttt{labs(x\ =\ NULL)} to remove
+the variable recoding specification.
 
 \begin{Schunk}
 \begin{Sinput}
-tidytitanic::passengers %>% 
+data.frame(ind_spam = c(TRUE, TRUE, FALSE, FALSE, FALSE)) %>% 
 ggplot() + 
-  aes(x = ind_recode(survived)) + 
-  geom_bar()
+  aes(x = ind_recode(ind_spam)) + 
+  geom_bar() +
+  theme_gray(base_size = 15)->
+p1
+
+p1 +
+  aes(x = ind_recode(ind_spam, cat_true = "suspicious")) ->
+p2
+
+p1 +
+  aes(x = ind_recode(ind_spam, negator = "~")) ->
+p3
+
+p1 +
+  aes(x = ind_recode(ind_spam, cat_false = "trustworthy")) ->
+p4
+
+
+p1 +
+  aes(x = ind_recode(ind_spam, rev = TRUE)) ->
+p5
+
+library(patchwork)
+
+(p1 + p2) /
+  (p3 + p4) /
+  (p5 + patchwork::plot_spacer())
 \end{Sinput}
 
-\includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_ind2cat_improves-1} \end{Schunk}
-
-\begin{Schunk}
-\begin{Sinput}
-# or
-last_plot() +
-  aes(x = ind_recode(survived, cat_false = "perished"))
-\end{Sinput}
-
-\includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_ind2cat_improves_cat_false-1} \end{Schunk}
-
-\begin{Schunk}
-\begin{Sinput}
-# or
-last_plot() +
-  aes(x = ind_recode(survived, cat_false = "didn't", rev = T)) + 
-  labs(x = NULL)
-\end{Sinput}
-
-\includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_ind2cat_improves_cat_false_rev-1} \end{Schunk}
-
-\begin{Schunk}
-\begin{Sinput}
-tidytitanic::passengers %>% 
-ggplot() + 
-  aes(x = sex) + 
-  geom_bar() + 
-  facet_grid(~ ind_recode(survived))
-\end{Sinput}
-
-\includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_ind2cat_preserves-1} \end{Schunk}
+\includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/visual_ind2cat_customization_in_visualizations-1} \end{Schunk}
 
 \begin{Schunk}
 \begin{Sinput}
 tidytitanic::passengers %>%
-  mutate(cat_survived = ind_recode(survived)) %>% 
+  mutate(cat_survived = ind_recode(survived, 
+                                   cat_false = "perished")) %>% 
   janitor::tabyl(sex, cat_survived) %>% 
   janitor::adorn_percentages() %>% 
   janitor::adorn_pct_formatting() %>% 
   janitor::adorn_ns(position = "rear")
 \end{Sinput}
 \begin{Soutput}
-         sex not survived    survived
-      female  33.3% (154) 66.7% (308)
-        male  83.3% (709) 16.7% (142)
+         sex    perished    survived
+      female 33.3% (154) 66.7% (308)
+        male 83.3% (709) 16.7% (142)
 \end{Soutput}
 \end{Schunk}
 
@@ -456,7 +434,7 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
     cat_false = paste(negator, cat_true)
   }
 
-  # for yes/no case
+  # for yes/no case - dangerously.
   if(is.character({{var}})){
 
     my_var <- {{var}} %>% as.factor() %>% as.numeric() - 1
@@ -477,6 +455,39 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 
 }
 \end{Sinput}
+\end{Schunk}
+
+\begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
+
+\hypertarget{readme.rmd-chunks-names}{%
+\section{README.Rmd chunks names}\label{readme.rmd-chunks-names}}
+
+\begin{Schunk}
+\begin{Sinput}
+knitr::knit_code$get() |> names()
+\end{Sinput}
+\begin{Soutput}
+      [1] "unnamed-chunk-1"                               
+      [2] "manipulation_status_quo"                       
+      [3] "visual_status_quo"                             
+      [4] "visual_status_quo_order"                       
+      [5] "direct_table_awkward"                          
+      [6] "direct_table_loss"                             
+      [7] "direct_visual_awkward"                         
+      [8] "direct_visual_loss"                            
+      [9] "manipulation_status_quo_reprise"               
+     [10] "manipulation_ind2cat"                          
+     [11] "manipulation_ind2cat_custom"                   
+     [12] "manipulation_ind2cat_negator"                  
+     [13] "manipulation_ind2cat_false_cat"                
+     [14] "manipulation_ind2cat_rev"                      
+     [15] "manipulation_ind2cat_prefix"                   
+     [16] "visual_ind2cat_customization_in_visualizations"
+     [17] "table_ind2cat_preserves"                       
+     [18] "unnamed-chunk-3"                               
+     [19] "unnamed-chunk-4"                               
+     [20] "unnamed-chunk-5"
+\end{Soutput}
 \end{Schunk}
 
 \bibliography{RJreferences.bib}
