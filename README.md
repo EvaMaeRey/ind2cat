@@ -5,6 +5,48 @@
 
 <!-- badges: end -->
 
+Ever use an indicator variable *directly* and made a sad plot?
+
+<img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
+
+Or a bad plot?
+
+<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+
+… because the repetitiveness of recoding felt too tedious…
+
+<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+
+Introducing ind2cat::ind\_recode()\! A concise, sensible function for
+making human-readable data summary products with indicator variables\!
+
+<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+
+<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+
+# Issues up front
+
+## disclosures
+
+0)  ind2cat is experimental
+1)  I’m not sure if there there is already a solution
+
+## to do to move ind2cat to more robust
+
+  - change to Rlang for grabbing function name (Claus Wilke)
+  - left join instead of ifelse to make code more performant (Emily
+    Rederer)
+  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
+    Danger.
+  - test\!
+
+# Thanks up front
+
+  - Emily Rederer
+  - Kyle McDermott
+  - Claus Wilke
+  - Yihui Xie
+
 # Abstract
 
 Indicator variables are easy to create, store, and interpret
@@ -25,22 +67,6 @@ light-weight syntax.
 
 <!-- see.. https://emilyriederer.netlify.app/post/column-name-contracts/ -->
 
-# Issues up front
-
-## disclosures
-
-0)  ind2cat is experimental
-1)  I’m not sure if there there is already a solution
-2)  unsure if there are fundamental problems with this approach
-
-## to do to move ind2cat out of proof of concept phase
-
-  - change to Rlang for grabbing function name (Claus Wilke)
-  - left join instead of ifelse to make code more performant (Emily
-    Rederer)
-  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
-    Danger.
-
 # Introduction
 
 Using current analytic tools, analysts make a choice between directly
@@ -55,14 +81,14 @@ repetitive; in the recoding line, ‘spam’ is typed four times.
 
 ``` r
 library(tidyverse)
-data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
-  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
-#>    spam cat_spam
-#> 1  TRUE     spam
-#> 2  TRUE     spam
-#> 3 FALSE not spam
-#> 4 FALSE not spam
-#> 5  TRUE     spam
+data.frame(ind_spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(ind_spam, "spam", "not spam"))
+#>   ind_spam cat_spam
+#> 1     TRUE     spam
+#> 2     TRUE     spam
+#> 3    FALSE not spam
+#> 4    FALSE not spam
+#> 5     TRUE     spam
 ```
 
 Likewise, in data visualization products where recoding can be done on
@@ -160,7 +186,7 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = age) + 
   geom_histogram() + 
-  facet_grid(~ survived)
+  facet_grid(~ survived) 
 ```
 
 <div class="figure">
@@ -441,23 +467,30 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 ``` r
 knitr::knit_code$get() |> names()
 #>  [1] "setup"                                         
-#>  [2] "manipulation_status_quo"                       
-#>  [3] "visual_status_quo"                             
-#>  [4] "visual_status_quo_order"                       
-#>  [5] "direct_table_awkward"                          
-#>  [6] "direct_table_loss"                             
-#>  [7] "direct_visual_awkward"                         
-#>  [8] "direct_visual_loss"                            
-#>  [9] "manipulation_status_quo_reprise"               
-#> [10] "manipulation_ind2cat"                          
-#> [11] "manipulation_ind2cat_custom"                   
-#> [12] "manipulation_ind2cat_negator"                  
-#> [13] "manipulation_ind2cat_false_cat"                
-#> [14] "manipulation_ind2cat_rev"                      
-#> [15] "manipulation_ind2cat_prefix"                   
-#> [16] "visual_ind2cat_customization_in_visualizations"
-#> [17] "table_ind2cat_preserves"                       
-#> [18] "read_in_function"                              
-#> [19] "display_function"                              
-#> [20] "get_chunk_names"
+#>  [2] "unnamed-chunk-1"                               
+#>  [3] "unnamed-chunk-2"                               
+#>  [4] "sqrecode"                                      
+#>  [5] "unnamed-chunk-3"                               
+#>  [6] "introduce_ind2cat"                             
+#>  [7] "unnamed-chunk-4"                               
+#>  [8] "unnamed-chunk-5"                               
+#>  [9] "manipulation_status_quo"                       
+#> [10] "visual_status_quo"                             
+#> [11] "visual_status_quo_order"                       
+#> [12] "direct_table_awkward"                          
+#> [13] "direct_table_loss"                             
+#> [14] "direct_visual_awkward"                         
+#> [15] "direct_visual_loss"                            
+#> [16] "manipulation_status_quo_reprise"               
+#> [17] "manipulation_ind2cat"                          
+#> [18] "manipulation_ind2cat_custom"                   
+#> [19] "manipulation_ind2cat_negator"                  
+#> [20] "manipulation_ind2cat_false_cat"                
+#> [21] "manipulation_ind2cat_rev"                      
+#> [22] "manipulation_ind2cat_prefix"                   
+#> [23] "visual_ind2cat_customization_in_visualizations"
+#> [24] "table_ind2cat_preserves"                       
+#> [25] "read_in_function"                              
+#> [26] "display_function"                              
+#> [27] "get_chunk_names"
 ```

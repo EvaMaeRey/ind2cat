@@ -11,11 +11,15 @@ knitr::knit_child("../../../README.rmd")
 ```
 
 ```{r}
-library(ggjudge)
-ggjudge::judge_chunk_code("direct_table_awkward")
+knitr::knit_code$get("")
 ```
 
+```{r}
+ggjudge::judge_chunk_code("direct_table_loss", "direct use of indicator")
+ggjudge::judge_chunk_output_text("direct_table_loss", "output suffers info loss")
+ggjudge::judge_chunk_output_text("direct_visual_loss", "output suffers info loss")
 
+```
 
 ---
 
