@@ -22,7 +22,7 @@ kabel_format <- "html"
 <!-- badges: start -->
 <!-- badges: end -->
 
-Ever use an indicator variable *directly* and made a sad plot?  
+## Ever use an indicator variable *directly* and made a sad plot?  
 
 ```{r, echo = F}
 library(tidyverse)
@@ -36,7 +36,7 @@ ggjudge::judge_plot(p, judgement = "sad")
 
 ```
 
-Or a bad plot?
+## Or a bad plot?
 
 ```{r echo = F}
 p <- tidytitanic::passengers %>% 
@@ -49,7 +49,7 @@ ggjudge::judge_plot(p, judgement = "bad")
 
 ```
 
-... because the repetitiveness of recoding felt too tedious...
+## ... because the repetitiveness of recoding felt too tedious?
 
 ```{r sqrecode, echo = F, eval = F}
 tidytitanic::passengers %>% 
@@ -65,7 +65,9 @@ tidytitanic::passengers %>%
 ggjudge::judge_chunk_code("sqrecode", "tedious")
 ```
 
-Introducing ind2cat::ind_recode()!  A concise, sensible function for making human-readable data summary products with indicator variables! 
+## Introducing ind2cat::ind_recode()!  
+
+ind2cat::ind_recode is a concise, sensible function for making human-readable data summary products with indicator variables! 
 
 ```{r introduce_ind2cat, echo = F, eval = F}
 library(ind2cat)

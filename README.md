@@ -5,20 +5,22 @@
 
 <!-- badges: end -->
 
-Ever use an indicator variable *directly* and made a sad plot?
+## Ever use an indicator variable *directly* and made a sad plot?
 
 <img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
 
-Or a bad plot?
+## Or a bad plot?
 
 <img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
 
-… because the repetitiveness of recoding felt too tedious…
+## … because the repetitiveness of recoding felt too tedious?
 
 <img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
 
-Introducing ind2cat::ind\_recode()\! A concise, sensible function for
-making human-readable data summary products with indicator variables\!
+## Introducing ind2cat::ind\_recode()\!
+
+ind2cat::ind\_recode is a concise, sensible function for making
+human-readable data summary products with indicator variables\!
 
 <img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
 
