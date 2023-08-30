@@ -79,11 +79,11 @@ tidytitanic::passengers %>%
 ```
 
 ```{r, echo = F}
-ggjudge::judge_chunk_code("introduce_ind2cat", "new code: concise")
+ggjudge::judge_chunk_code("introduce_ind2cat", "concise code")
 ```
 
 ```{r, echo = F}
-ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "plot: nice")
+ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "nice plot")
 ```
 
 # Issues up front

@@ -33,7 +33,7 @@ kabel_format <- "latex"
 
 
 library(magrittr)
-readLines("../../../README.Rmd")  %>%  .[46:length(.)] %>% 
+readLines("../../../README.Rmd")  %>%  .[119:length(.)] %>% 
   writeLines("../../../readme_extract.Rmd")
 ```
 

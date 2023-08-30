@@ -38,16 +38,16 @@ repetitive; in the recoding line, `spam' is typed four times.
 \begin{Schunk}
 \begin{Sinput}
 library(tidyverse)
-data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
-  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
+data.frame(ind_spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(ind_spam, "spam", "not spam"))
 \end{Sinput}
 \begin{Soutput}
-        spam cat_spam
-     1  TRUE     spam
-     2  TRUE     spam
-     3 FALSE not spam
-     4 FALSE not spam
-     5  TRUE     spam
+       ind_spam cat_spam
+     1     TRUE     spam
+     2     TRUE     spam
+     3    FALSE not spam
+     4    FALSE not spam
+     5     TRUE     spam
 \end{Soutput}
 \end{Schunk}
 
@@ -73,8 +73,8 @@ resultant categories; ordering in products will be alphabetical and not
 reflect the F/T order of the source variable. An additional step to
 reflect the source variable, using a function like forcats::fct\_rev,
 may be required for consistent reporting. We show this with another
-visualization example, and see that the definition of the x axis becomes
-easy to reason about.
+visualization example, and see that the specification of the x axis
+variable becomes more difficult to reason about.
 
 \begin{Schunk}
 \begin{Sinput}
@@ -150,7 +150,7 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = age) + 
   geom_histogram() + 
-  facet_grid(~ survived)
+  facet_grid(~ survived) 
 \end{Sinput}
 \begin{figure}
 \includegraphics[width=0.69\linewidth]{r_journal_files/figure-latex/direct_visual_loss-1} \caption[D]{D. Facetting directly on an indicator variable with popular ggplot2 results in information loss}\label{fig:direct_visual_loss}
@@ -467,7 +467,7 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 knitr::knit_code$get() |> names()
 \end{Sinput}
 \begin{Soutput}
-      [1] "unnamed-chunk-1"                               
+      [1] "setup_rjournal"                                
       [2] "manipulation_status_quo"                       
       [3] "visual_status_quo"                             
       [4] "visual_status_quo_order"                       
@@ -484,9 +484,9 @@ knitr::knit_code$get() |> names()
      [15] "manipulation_ind2cat_prefix"                   
      [16] "visual_ind2cat_customization_in_visualizations"
      [17] "table_ind2cat_preserves"                       
-     [18] "unnamed-chunk-3"                               
-     [19] "unnamed-chunk-4"                               
-     [20] "unnamed-chunk-5"
+     [18] "read_in_function"                              
+     [19] "display_function"                              
+     [20] "get_chunk_names"
 \end{Soutput}
 \end{Schunk}
 

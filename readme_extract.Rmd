@@ -1,4 +1,3 @@
-
 # Introduction
 
 Using current analytic tools, analysts make a choice between directly using indicator variables or recoding the variable first to categorical.  Current procedures for recoding indicator variables to a categorical variable is repetitive, but forgoing a recode and using indicator variables directly yields hard-to-interpret summary products. 
@@ -7,8 +6,8 @@ The data below inspired by email training data, demonstrates how an analyst migh
 
 ```{r manipulation_status_quo}
 library(tidyverse)
-data.frame(spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
-  mutate(cat_spam = ifelse(spam, "spam", "not spam"))
+data.frame(ind_spam = c(TRUE, TRUE, FALSE, FALSE, TRUE)) %>% 
+  mutate(cat_spam = ifelse(ind_spam, "spam", "not spam"))
 ```
 
 Likewise, in data visualization products where recoding can be done on the fly, we see that the process can be repetative.
@@ -23,7 +22,7 @@ ggplot() +
                       "not survived")) 
 ```
 
-Furthermore, the `ifelse()` approach to recoding indicator variables also has the disadvantage of not consistently ordering the resultant categories; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistent reporting.  We show this with another visualization example, and see that the definition of the x axis becomes easy to reason about.  
+Furthermore, the `ifelse()` approach to recoding indicator variables also has the disadvantage of not consistently ordering the resultant categories; ordering in products will be alphabetical and not reflect the F/T order of the source variable.  An additional step to reflect the source variable, using a function like forcats::fct_rev, may be required for consistent reporting.  We show this with another visualization example, and see that the specification of the x axis variable becomes more difficult to reason about.  
 
 
 ```{r visual_status_quo_order}
@@ -67,7 +66,7 @@ tidytitanic::passengers %>%
 ggplot() + 
   aes(x = age) + 
   geom_histogram() + 
-  facet_grid(~ survived)
+  facet_grid(~ survived) 
 ```
 
 
@@ -203,18 +202,18 @@ tidytitanic::passengers %>%
 
 # Implementation details
 
-```{r}
+```{r read_in_function}
 readLines("R/ind_recode.R") -> implementation
 ```
 
-```{r, code = implementation, eval= F}
+```{r display_function, code = implementation, eval= F}
 ```
 
 ---
 
 # README.Rmd chunks names
 
-```{r}
+```{r get_chunk_names}
 knitr::knit_code$get() |> names()
 ```
 
