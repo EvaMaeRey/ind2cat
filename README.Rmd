@@ -24,28 +24,28 @@ kabel_format <- "html"
 
 ## Ever use an indicator variable *directly* and made a sad plot?  
 
-```{r, echo = F}
+```{r sad, echo = F}
 library(tidyverse)
 theme_set(theme_grey(base_size = 20))
-p <- tidytitanic::passengers %>% 
+p_sad <- tidytitanic::passengers %>% 
  ggplot() + 
   aes(x = survived) + 
   geom_bar()
 
-ggjudge::judge_plot(p, judgement = "sad")
+ggjudge::judge_plot(p_sad, judgement = "sad")
 
 ```
 
 ## Or a bad plot?
 
-```{r echo = F}
-p <- tidytitanic::passengers %>% 
+```{r bad,  echo = F}
+p_bad <- tidytitanic::passengers %>% 
   ggplot() + 
   aes(x = age) + 
   geom_histogram() + 
   facet_grid(~ survived) 
 
-ggjudge::judge_plot(p, judgement = "bad")
+ggjudge::judge_plot(p_bad, judgement = "bad")
 
 ```
 
@@ -61,7 +61,7 @@ tidytitanic::passengers %>%
                       "not survived"))
 ```
 
-```{r, echo = F}
+```{r tedious, echo = F}
 ggjudge::judge_chunk_code("sqrecode", "tedious")
 ```
 
@@ -78,11 +78,11 @@ tidytitanic::passengers %>%
   facet_grid(~ ind_recode(survived))
 ```
 
-```{r, echo = F}
+```{r concise, echo = F}
 ggjudge::judge_chunk_code("introduce_ind2cat", "concise code")
 ```
 
-```{r, echo = F}
+```{r nice, echo = F}
 ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "nice plot")
 ```
 
@@ -335,4 +335,14 @@ readLines("R/ind_recode.R") -> implementation
 knitr::knit_code$get() |> names()
 ```
 
+# Github Social
 
+```{r githubsocial, fig.width=30, fig.height=15}
+library(patchwork)
+(ggjudge::judge_plot(p_sad, judgement = "using indicators directly can be sad") + 
+ggjudge::judge_plot(p_bad, judgement = "and is some of the time it's just bad") + 
+ggjudge::judge_chunk_code("sqrecode", "but current recodes are tedious"))/
+
+(ggjudge::judge_chunk_code("introduce_ind2cat", "so introducing ind2cat::ind_recode()") + 
+ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice")+ patchwork::plot_spacer())
+```

@@ -7,24 +7,24 @@
 
 ## Ever use an indicator variable *directly* and made a sad plot?
 
-<img src="man/figures/README-unnamed-chunk-1-1.png" width="100%" />
+<img src="man/figures/README-sad-1.png" width="100%" />
 
 ## Or a bad plot?
 
-<img src="man/figures/README-unnamed-chunk-2-1.png" width="100%" />
+<img src="man/figures/README-bad-1.png" width="100%" />
 
 ## … because the repetitiveness of recoding felt too tedious?
 
-<img src="man/figures/README-unnamed-chunk-3-1.png" width="100%" />
+<img src="man/figures/README-tedious-1.png" width="100%" />
 
 ## Introducing ind2cat::ind\_recode()\!
 
 ind2cat::ind\_recode is a concise, sensible function for making
 human-readable data summary products with indicator variables\!
 
-<img src="man/figures/README-unnamed-chunk-4-1.png" width="100%" />
+<img src="man/figures/README-concise-1.png" width="100%" />
 
-<img src="man/figures/README-unnamed-chunk-5-1.png" width="100%" />
+<img src="man/figures/README-nice-1.png" width="100%" />
 
 # Issues up front
 
@@ -469,13 +469,13 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 ``` r
 knitr::knit_code$get() |> names()
 #>  [1] "setup"                                         
-#>  [2] "unnamed-chunk-1"                               
-#>  [3] "unnamed-chunk-2"                               
+#>  [2] "sad"                                           
+#>  [3] "bad"                                           
 #>  [4] "sqrecode"                                      
-#>  [5] "unnamed-chunk-3"                               
+#>  [5] "tedious"                                       
 #>  [6] "introduce_ind2cat"                             
-#>  [7] "unnamed-chunk-4"                               
-#>  [8] "unnamed-chunk-5"                               
+#>  [7] "concise"                                       
+#>  [8] "nice"                                          
 #>  [9] "manipulation_status_quo"                       
 #> [10] "visual_status_quo"                             
 #> [11] "visual_status_quo_order"                       
@@ -494,5 +494,20 @@ knitr::knit_code$get() |> names()
 #> [24] "table_ind2cat_preserves"                       
 #> [25] "read_in_function"                              
 #> [26] "display_function"                              
-#> [27] "get_chunk_names"
+#> [27] "get_chunk_names"                               
+#> [28] "githubsocial"
 ```
+
+# Github Social
+
+``` r
+library(patchwork)
+(ggjudge::judge_plot(p_sad, judgement = "using indicators directly can be sad") + 
+ggjudge::judge_plot(p_bad, judgement = "and is some of the time it's just bad") + 
+ggjudge::judge_chunk_code("sqrecode", "but current recodes are tedious"))/
+
+(ggjudge::judge_chunk_code("introduce_ind2cat", "so introducing ind2cat::ind_recode()") + 
+ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice")+ patchwork::plot_spacer())
+```
+
+<img src="man/figures/README-githubsocial-1.png" width="100%" />
