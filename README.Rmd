@@ -339,10 +339,10 @@ knitr::knit_code$get() |> names()
 
 ```{r githubsocial, fig.width=30, fig.height=15}
 library(patchwork)
-(ggjudge::judge_plot(p_sad, judgement = "using indicators directly can be sad") + 
-ggjudge::judge_plot(p_bad, judgement = "and is some of the time it's just bad") + 
-ggjudge::judge_chunk_code("sqrecode", "but current recodes are tedious"))/
+(ggjudge::judge_plot(p_sad, judgement = "Using indicators themselves can be sad") + 
+ggjudge::judge_plot(p_bad, judgement = "And some of the time it's just bad") + 
+ggjudge::judge_chunk_code("sqrecode", "While some recodes are tired"))/
 
-(ggjudge::judge_chunk_code("introduce_ind2cat", "so introducing ind2cat::ind_recode()") + 
-ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice")+ patchwork::plot_spacer())
+(ggjudge::judge_chunk_code("introduce_ind2cat", "ind2cat::ind_recode()'s inspired") + 
+ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice") + patchwork::plot_spacer())
 ```

@@ -1,8 +1,6 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 ## Ever use an indicator variable *directly* and made a sad plot?
@@ -17,10 +15,10 @@
 
 <img src="man/figures/README-tedious-1.png" width="100%" />
 
-## Introducing ind2cat::ind\_recode()\!
+## Introducing ind2cat::ind_recode()!
 
-ind2cat::ind\_recode is a concise, sensible function for making
-human-readable data summary products with indicator variables\!
+ind2cat::ind_recode is a concise, sensible function for making
+human-readable data summary products with indicator variables!
 
 <img src="man/figures/README-concise-1.png" width="100%" />
 
@@ -35,19 +33,18 @@ human-readable data summary products with indicator variables\!
 
 ## to do to move ind2cat to more robust
 
-  - change to Rlang for grabbing function name (Claus Wilke)
-  - left join instead of ifelse to make code more performant (Emily
-    Rederer)
-  - make “Y” “N” a lot stricter - right now we’re assuming a ton\!
-    Danger.
-  - test\!
+- change to Rlang for grabbing function name (Claus Wilke)
+- left join instead of ifelse to make code more performant (Emily
+  Rederer)
+- make “Y” “N” a lot stricter - right now we’re assuming a ton! Danger.
+- test!
 
 # Thanks up front
 
-  - Emily Rederer
-  - Kyle McDermott
-  - Claus Wilke
-  - Yihui Xie
+- Emily Rederer
+- Kyle McDermott
+- Claus Wilke
+- Yihui Xie
 
 # Abstract
 
@@ -112,10 +109,10 @@ Furthermore, the `ifelse()` approach to recoding indicator variables
 also has the disadvantage of not consistently ordering the resultant
 categories; ordering in products will be alphabetical and not reflect
 the F/T order of the source variable. An additional step to reflect the
-source variable, using a function like forcats::fct\_rev, may be
-required for consistent reporting. We show this with another
-visualization example, and see that the specification of the x axis
-variable becomes more difficult to reason about.
+source variable, using a function like forcats::fct_rev, may be required
+for consistent reporting. We show this with another visualization
+example, and see that the specification of the x axis variable becomes
+more difficult to reason about.
 
 ``` r
 data.frame(ind_grad = c(T, F, T, T)) %>% 
@@ -170,11 +167,8 @@ tidytitanic::passengers %>%
 <div class="figure">
 
 <img src="man/figures/README-direct_visual_awkward-1.png" alt="A. Bar labels + axis label preserves information but is awkward" width="100%" />
-
 <p class="caption">
-
 A. Bar labels + axis label preserves information but is awkward
-
 </p>
 
 </div>
@@ -194,19 +188,16 @@ ggplot() +
 <div class="figure">
 
 <img src="man/figures/README-direct_visual_loss-1.png" alt="D. Facetting directly on an indicator variable with popular ggplot2 results in information loss" width="100%" />
-
 <p class="caption">
-
 D. Facetting directly on an indicator variable with popular ggplot2
 results in information loss
-
 </p>
 
 </div>
 
-# Introducing ind2cat::ind\_recode
+# Introducing ind2cat::ind_recode
 
-The ind2cat::ind\_recode() function uses indicator variable names to
+The ind2cat::ind_recode() function uses indicator variable names to
 automatically derive human-readable, and appropriately ordered
 categories.
 
@@ -233,9 +224,9 @@ data.frame(ind_graduated =
 #> 3         FALSE not graduated
 ```
 
-Below we contrast this with the use of ind2cat’s ind\_recode function
+Below we contrast this with the use of ind2cat’s ind_recode function
 which avoids repetition by creating categories based on the indicator
-variable name. Using the the function ind\_recode(), we can accomplish
+variable name. Using the the function ind_recode(), we can accomplish
 the same task shown above more succinctly:
 
 ``` r
@@ -252,11 +243,11 @@ data.frame(ind_graduated =
 #> 3         FALSE not graduated
 ```
 
-The function ind\_recode is flexible, and can recode from variable
+The function ind_recode is flexible, and can recode from variable
 populated with TRUE/FALSE values as well as 1/0 or “Yes”/“No” (and
 variants ‘y/n’ for example).
 
-Furthermore, while ind\_recode default functionality allows analysts to
+Furthermore, while ind_recode default functionality allows analysts to
 move from its first-cut human-readable recode, it also allows fully
 customized categories via adjustment of the functions parameters.
 
@@ -338,7 +329,7 @@ tibble(dummy_grad = c(0, 0, 1, 1, 1 ,0 ,0)) %>%
 ## Use in data products like figures and tables
 
 In the summary figure, we show the values that result from using
-ind\_recode on the fly in ggplot2. In a true-to-life analytic reporting
+ind_recode on the fly in ggplot2. In a true-to-life analytic reporting
 space, the analyst could then use `labs(x = NULL)` to remove the
 variable recoding specification.
 
@@ -462,7 +453,7 @@ ind_recode <- function(var, var_prefix = "ind_", negator = "not",
 }
 ```
 
------
+------------------------------------------------------------------------
 
 # README.Rmd chunks names
 
@@ -502,12 +493,12 @@ knitr::knit_code$get() |> names()
 
 ``` r
 library(patchwork)
-(ggjudge::judge_plot(p_sad, judgement = "using indicators directly can be sad") + 
-ggjudge::judge_plot(p_bad, judgement = "and is some of the time it's just bad") + 
-ggjudge::judge_chunk_code("sqrecode", "but current recodes are tedious"))/
+(ggjudge::judge_plot(p_sad, judgement = "Using indicators themselves can be sad") + 
+ggjudge::judge_plot(p_bad, judgement = "And some of the time it's just bad") + 
+ggjudge::judge_chunk_code("sqrecode", "While some recodes are tired"))/
 
-(ggjudge::judge_chunk_code("introduce_ind2cat", "so introducing ind2cat::ind_recode()") + 
-ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice")+ patchwork::plot_spacer())
+(ggjudge::judge_chunk_code("introduce_ind2cat", "ind2cat::ind_recode()'s inspired") + 
+ggjudge::judge_chunk_output_plot("introduce_ind2cat", judgement = "code's concise and plot's also nice") + patchwork::plot_spacer())
 ```
 
 <img src="man/figures/README-githubsocial-1.png" width="100%" />
